@@ -1,6 +1,6 @@
 # Trade Rewind
 ### Data 515 Final Project - UW
-#### authors: Arlette Ngabonzima, Priyal Jain, Sophia Koehn
+#### Authors: Arlette Ngabonzima, Priyal Jain, Sophia Koehn
 
 Project Type: Interactive Tool
 
@@ -10,15 +10,21 @@ Questions of Interest:
     3. Can traders identify bad trading strategies from bad timing?
 
 Goal: TradeRewind is a Python toolkit that allows users to:
+
     - *Define* their trading strategy (rules for when to buy/sell)
-    - *Backtest* the strategy on historical stock market data (2015-2024)
+    
+    - *Backtest* the strategy on historical stock market data
+    
     - *Analyze* performance with professional-grade metrics
+    
     - *Visualize* results with charts and reports
+    
     - *Compare* different strategies to find the best approach
 
     We aim to address these challenges and make financial decisions easier for all types of users.
 
-Data Sources: 
+Data Sources:
+
     -  https://pypi.org/project/yfinance/
     - https://fred.stlouisfed.org/docs/api/fred/
     - https://www.kaggle.com/datasets/miguelaenlle/massive-stock-news-analysis-db-for-nlpbacktests 
