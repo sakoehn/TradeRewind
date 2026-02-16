@@ -1,0 +1,18 @@
+Notes on Arlette’s dataset 
+https://www.kaggle.com/datasets/jacksoncrow/stock-market-dataset  
+This one is a Nasdaq
+This one essentially highlights whether it is NASDAQ-listed vs non-NASDAQ and the health of the stock 
+it could be still be used but as informational table that we bring in for joining
+
+
+
+https://www.kaggle.com/datasets/thesnak/stock-market-analysis 
+Very relevant with numerous stocks to offer insight into a stock’s high, low, and traded volume
+Very limited in times of time - its data for only 2 months (2025 - 02 -07 to 2025 - 05 -05)
+
+
+
+https://www.kaggle.com/datasets/deboleenamukherjee/financial-risk-data-large 
+This one is a little irrelevant for this project, it analyzes an individual's financial risk when it comes to being approved for a loan.
+The dataset consists of 50 features related to personal and financial attributes of individuals
+May be later we can look into how to use it but for now its irrelevant 
