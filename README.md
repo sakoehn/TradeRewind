@@ -1,6 +1,6 @@
 # Trade Rewind
 ### Data 515 Final Project - UW
-#### Authors: Arlette Ngabonzima, Priyal Jain, Sophia Koehn
+#### Authors: Arlette Ngabonzima, Priyal Jain, Sophia Koehn, Scott Fry
 
 Project Type: Interactive Tool
 
