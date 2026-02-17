@@ -11,21 +11,21 @@ Questions of Interest:
 
 Goal: TradeRewind is a Python toolkit that allows users to:
 
-    - *Define* their trading strategy (rules for when to buy/sell)
+- **Define** their trading strategy (rules for when to buy/sell)
     
-    - *Backtest* the strategy on historical stock market data
+- **Backtest** the strategy on historical stock market data
     
-    - *Analyze* performance with professional-grade metrics
+- **Analyze** performance with professional-grade metrics
     
-    - *Visualize* results with charts and reports
+- **Visualize** results with charts and reports
     
-    - *Compare* different strategies to find the best approach
+- **Compare** different strategies to find the best approach
 
-    We aim to address these challenges and make financial decisions easier for all types of users.
+We aim to address these challenges and make financial decisions easier for all types of users.
 
 Data Sources:
 
-    -  https://pypi.org/project/yfinance/
+    - https://pypi.org/project/yfinance/
     - https://fred.stlouisfed.org/docs/api/fred/
     - https://www.kaggle.com/datasets/miguelaenlle/massive-stock-news-analysis-db-for-nlpbacktests 
     - https://www.kaggle.com/datasets/borismarjanovic/price-volume-data-for-all-us-stocks-etfs/data 
