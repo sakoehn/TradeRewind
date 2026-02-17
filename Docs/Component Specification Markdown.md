@@ -6,8 +6,7 @@ Please note that within each component we include a high level description of wh
 
 **Name:** Authenticate
 
-**What it does:**  
-Verifies that a user exists in the system and that the password supplied matches the stored credentials.
+**What it does:**  Verifies that a user exists in the system and that the password supplied matches the stored credentials.
 
 **Inputs (with type information):**
 
