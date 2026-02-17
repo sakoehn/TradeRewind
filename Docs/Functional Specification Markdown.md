@@ -218,7 +218,7 @@ Mean Reversion: Threshold \= 2% drop, Exit \= 1% gain
 
 **3**. **Objective: User Accessing their report history**
 
-	**User:** Clicks of the “Report History” Page
+**User:** Clicks of the “Report History” Page
 
 **System:** Shows a page with all the report histories the user ran order by date in descending order
 

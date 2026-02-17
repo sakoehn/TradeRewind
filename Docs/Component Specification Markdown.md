@@ -76,7 +76,7 @@ This is a feature for each metric that will be computed
 **Component 4:** Information  
 	**Name:** Information Page
 
-	**What it does**:  
+**What it does**:  
 Gives detailed information to the user. Describes the metrics (both definition and  
 calculation formula). Explains the different trading strategies. Lists the different stock  
 options to analyze. 
