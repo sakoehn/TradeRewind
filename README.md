@@ -5,9 +5,10 @@
 Project Type: Interactive Tool
 
 Questions of Interest:
-    1. Can traders test trading strategies without using real money?
-    2. Can traders validate strategies using historical trends?
-    3. Can traders identify bad trading strategies from bad timing?
+
+1. Can traders test trading strategies without using real money?
+2. Can traders validate strategies using historical trends?
+3. Can traders identify bad trading strategies from bad timing?
 
 Goal: TradeRewind is a Python toolkit that allows users to:
 
