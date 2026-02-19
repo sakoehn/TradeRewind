@@ -35,3 +35,6 @@ Data Sources:
     - https://www.kaggle.com/datasets/deboleenamukherjee/financial-risk-data-large 
 
 
+**Disclaimer**
+This tool is for educational and research purposes. Historical data does not guarantee future results. Always conduct thorough testing before using any trading strategy with real money.
+
