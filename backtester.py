@@ -2,7 +2,7 @@
 import sys
 print(sys.executable)
 
-from data_cleaning import load_all_data
+from data_loading import load_all_data
 from strategies import buy_and_hold
 from metrics import compute_metrics
 from stock_history import get_stock_history

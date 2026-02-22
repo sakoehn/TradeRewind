@@ -85,7 +85,7 @@ def get_stock_history(stock, start=None, end=None, df=None):
 
 if __name__ == "__main__":
     # test
-    from data_cleaning import load_all_data
+    from data_loading import load_all_data
 
     df = load_all_data()
     stock_history = get_stock_history("AAPL", pd.Timestamp("2016-02-19"), pd.Timestamp("2026-02-19"), df)
