@@ -1,4 +1,4 @@
-# Trade Rewind: Technical Review 
+# Trade Rewind: Technology Review 
 
 ---
 
@@ -16,12 +16,12 @@ Building this application requires decisions across three distinct technical are
 
 ### 2.1 User Interface Framework
 
-The UI layer needs to render charts, accept user inputs (strategy parameters, date ranges, stock selection), and display results tables — all without requiring the team to write and maintain custom HTML/CSS/JavaScript.
+The UI layer needs to render charts, accept user inputs (strategy parameters, date ranges, stock selection), and display results tables - all without requiring the team to write and maintain custom HTML/CSS/JavaScript.
 
 #### Candidate: Streamlit
 - **Author:** Streamlit Inc. (acquired by Snowflake, 2022)
 - **License:** Apache 2.0
-- **Summary:** Streamlit turns a plain Python script into an interactive web application. Widgets like sliders, dropdowns, and file uploaders are declared in a single line of Python. There is no separation between frontend and backend code — the same script handles both. Streamlit renders in the browser but requires no web development knowledge.
+- **Summary:** Streamlit turns a plain Python script into an interactive web application. Widgets like sliders, dropdowns, and file uploaders are declared in a single line of Python. There is no separation between frontend and backend code - the same script handles both. Streamlit renders in the browser but requires no web development knowledge.
 
 #### Candidate: Flask
 - **Author:** Armin Ronacher / Pallets Project
@@ -37,8 +37,8 @@ The UI layer needs to render charts, accept user inputs (strategy parameters, da
 
 | Criterion | Streamlit | Flask | Gradio |
 |---|---|---|---|
-| **Setup complexity** | Minimal — one script | High — routes, templates, static files | Minimal |
-| **Python-only development** | Yes | No — requires HTML/Jinja2 | Yes |
+| **Setup complexity** | Minimal - one script | High - routes, templates, static files | Minimal |
+| **Python-only development** | Yes | No - requires HTML/Jinja2 | Yes |
 | **Layout flexibility** | Moderate | Full | Limited |
 | **Data table display** | `st.dataframe()` built-in | Manual HTML rendering | Limited |
 | **Chart integration** | Native Plotly & Matplotlib support | Manual embedding | Basic |
@@ -47,7 +47,7 @@ The UI layer needs to render charts, accept user inputs (strategy parameters, da
 
 #### Final Choice: Streamlit
 
-Streamlit is chosen because the team's focus is on backtesting logic and financial analysis, not web development. It provides built-in components for everything Trade Rewind needs — data tables, file upload, sidebar controls, and chart rendering — with no HTML or JavaScript required. Flask would require maintaining a separate frontend layer that adds complexity without benefit for this scope. Gradio's limited layout options make it unsuitable for a multi-panel dashboard displaying strategy results, equity curves, and metrics side by side.
+Streamlit is chosen because the team's focus is on backtesting logic and financial analysis, not web development. It provides built-in components for everything Trade Rewind needs - data tables, file upload, sidebar controls, and chart rendering - with no HTML or JavaScript required. Flask would require maintaining a separate frontend layer that adds complexity without benefit for this scope. Gradio's limited layout options make it unsuitable for a multi-panel dashboard displaying strategy results, equity curves, and metrics side by side.
 
 ---
 
@@ -58,12 +58,12 @@ The backtesting engine must load historical OHLCV data, compute rolling indicato
 #### Candidate: Pandas
 - **Author:** Wes McKinney (now maintained by the Pandas Development Team / NumFOCUS)
 - **License:** BSD 3-Clause
-- **Summary:** Pandas provides the `DataFrame` — a labeled, two-dimensional table structure that maps directly onto how financial time series data is naturally shaped: rows are dates, columns are price fields (Open, High, Low, Close, Volume). It supports date-aware indexing, rolling window calculations (`rolling().mean()`), boolean filtering for trade signals, and direct CSV import. The `st.dataframe()` Streamlit widget accepts a Pandas DataFrame directly, making the path from raw data to displayed results table seamless.
+- **Summary:** Pandas provides the `DataFrame` - a labeled, two-dimensional table structure that maps directly onto how financial time series data is naturally shaped: rows are dates, columns are price fields (Open, High, Low, Close, Volume). It supports date-aware indexing, rolling window calculations (`rolling().mean()`), boolean filtering for trade signals, and direct CSV import. The `st.dataframe()` Streamlit widget accepts a Pandas DataFrame directly, making the path from raw data to displayed results table seamless.
 
 #### Candidate: NumPy
 - **Author:** Travis Oliphant (now maintained by the NumPy Development Team / NumFOCUS)
 - **License:** BSD 3-Clause
-- **Summary:** NumPy provides the N-dimensional array (`ndarray`) and the mathematical operations that run on it. It is the computational foundation that Pandas is built on. For Trade Rewind, NumPy is used directly in `metrics.py` to implement Sharpe Ratio, annualized return, and Max Drawdown calculations — operations more naturally expressed as array math than as DataFrame operations. NumPy's vectorized operations also make these calculations significantly faster than Python loops over the same data.
+- **Summary:** NumPy provides the N-dimensional array (`ndarray`) and the mathematical operations that run on it. It is the computational foundation that Pandas is built on. For Trade Rewind, NumPy is used directly in `metrics.py` to implement Sharpe Ratio, annualized return, and Max Drawdown calculations - operations more naturally expressed as array math than as DataFrame operations. NumPy's vectorized operations also make these calculations significantly faster than Python loops over the same data.
 
 #### Why not use a dedicated math library (e.g., SciPy, TA-Lib)?
 
@@ -75,10 +75,10 @@ SciPy and TA-Lib offer pre-built financial indicator and statistics functions. H
 |---|---|---|
 | **Primary use in project** | Data loading, time series management, trade logs, results tables | Metric calculations (Sharpe, drawdown, returns) |
 | **Data structure** | DataFrame (labeled rows/columns, date index) | ndarray (unlabeled, fast numerical arrays) |
-| **CSV import** | `pd.read_csv()` — one line | Not designed for this |
+| **CSV import** | `pd.read_csv()` - one line | Not designed for this |
 | **Rolling indicators** | `df['MA20'] = df['Close'].rolling(20).mean()` | Requires manual implementation |
 | **Vectorized math** | Supported, but slower than NumPy for pure computation | Core strength |
-| **Streamlit display** | `st.dataframe(df)` — native | Not directly displayable |
+| **Streamlit display** | `st.dataframe(df)` - native | Not directly displayable |
 
 Pandas and NumPy are complementary rather than competing. Pandas handles everything involving labeled data and time series structure; NumPy handles the numerical computation layer underneath. Both are required.
 
@@ -94,7 +94,7 @@ Pandas and NumPy are complementary rather than competing. Pandas handles everyth
 
 #### Candidate: Seaborn
 - **Author:** Michael Waskom
-- **Version reviewed:** 0.13.2 *(installed and tested)*
+- **Version reviewed:** 0.13.2
 - **License:** BSD 3-Clause
 - **Summary:** A statistical visualization library built on Matplotlib with cleaner defaults and less boilerplate. Static output only. Render time in testing: ~0.12s for the same chart.
 
@@ -109,7 +109,7 @@ Pandas and NumPy are complementary rather than competing. Pandas handles everyth
 | Criterion | Matplotlib | Seaborn | Plotly |
 |---|---|---|---|
 | **Interactivity** | None (static) | None (static) | Full (zoom, pan, hover tooltips) |
-| **Streamlit integration** | `st.pyplot()` | `st.pyplot()` | `st.plotly_chart()` — native |
+| **Streamlit integration** | `st.pyplot()` | `st.pyplot()` | `st.plotly_chart()` - native |
 | **PDF report export** | Native | Native (via Matplotlib) | Requires `kaleido` dependency |
 | **Render time (100-pt line)** | ~0.17s | ~0.12s | ~0.3–0.5s (browser render) |
 | **Default aesthetics** | Minimal | Clean | Polished, modern |
@@ -117,7 +117,7 @@ Pandas and NumPy are complementary rather than competing. Pandas handles everyth
 
 #### Final Choice: Plotly (primary) + Matplotlib (PDF reports only)
 
-Plotly is the primary charting library for all in-app visualizations because Trade Rewind is an exploratory tool — users need to zoom into drawdown periods, hover for exact values, and compare strategies visually. Static charts cannot support this workflow. Matplotlib is retained only for PDF report generation where HTML/JS output is not applicable. Seaborn is not included as it provides no capability beyond Matplotlib for this project's needs.
+Plotly is the primary charting library for all in-app visualizations because Trade Rewind is an exploratory tool - users need to zoom into drawdown periods, hover for exact values, and compare strategies visually. Static charts cannot support this workflow. Matplotlib is retained only for PDF report generation where HTML/JS output is not applicable. Seaborn is not included as it provides no capability beyond Matplotlib for this project's needs.
 
 ---
 
@@ -137,9 +137,9 @@ Plotly is the primary charting library for all in-app visualizations because Tra
 
 ## 4. Drawbacks & Areas of Concern
 
-**Streamlit:** Stateless by default — every user interaction reruns the entire script. For computationally heavy backtests this can cause slow or unresponsive behavior. Mitigation: use `@st.cache_data` to cache backtest results and avoid redundant recalculation.
+**Streamlit:** Stateless by default - every user interaction reruns the entire script. For computationally heavy backtests this can cause slow or unresponsive behavior. Mitigation: use `@st.cache_data` to cache backtest results and avoid redundant recalculation.
 
-**Plotly:** Performance degrades with datasets above ~50,000 points. Daily OHLCV data across a few years is well within safe limits, but intraday data would be a risk. PDF export requires the `kaleido` binary which can have version compatibility issues — Matplotlib is used instead for all report output. The JavaScript bundle (~3 MB) adds initial page-load latency.
+**Plotly:** Performance degrades with datasets above ~50,000 points. Daily OHLCV data across a few years is well within safe limits, but intraday data would be a risk. PDF export requires the `kaleido` binary which can have version compatibility issues - Matplotlib is used instead for all report output. The JavaScript bundle (~3 MB) adds initial page-load latency.
 
 **Pandas:** Memory usage scales with dataset size. Loading many stocks simultaneously could become a concern. For the current scope of individual CSV files per stock this is not an issue.
 
