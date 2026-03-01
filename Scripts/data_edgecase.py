@@ -52,6 +52,32 @@ for i in df['company_name']:
     if len(i.split(' ')) <= 1:
         print(i)
 
+def next_nonzero_date(date, column, data=None):
+    """
+    Given a target `date`, snap to the previous index value (if no exact match),
+    then walk forward until `column` is non-zero. Returns the index date.
+    """
+    if data is None:
+        data = df  # use global df
+
+    # normalize to Timestamp
+    ts = pd.to_datetime(date)
+
+    # snap to previous index value if not exact
+    pos = data.index.get_loc(ts, method="pad")  # previous date if missing
+    idx = pos if isinstance(pos, int) else pos.start  # handle slice in edge cases
+
+    # walk forward until non-zero or out of data
+    while idx < len(data.index) and data.iloc[idx][column] == 0:
+        idx += 1
+
+    if idx >= len(data.index):
+        raise ValueError(f"No non-zero value found for {column} on or after {date}")
+
+    return data.index[idx]
+
+
+
 def validate_date(start, end):
     try:
         if start is None:
@@ -128,25 +154,33 @@ def validate_metric(metrics):
 def obtain_info(stocks, start=None, end=None, metric=None):
     # 1. Dates
     start_ts, end_ts = validate_date(start, end)
-    print("start:", start_ts, " end:", end_ts)
 
     # 2. Stocks → tickers
     tickers = validate_stock(stocks)
-    print("tickers:", tickers)
 
     # 3. Metrics
     metrics = validate_metric(metric)
-    print("metrics:", metrics)
+
+    # restrict to requested tickers before searching for dates
+    stock_mask = df["ticker"].isin(tickers)
+    df_sub = df.loc[stock_mask]
+
+    # use first metric as reference column for "non-zero"
+    ref_col = metrics[0]
+
+    # walk forward from requested dates to next non-zero
+    start_ts = next_nonzero_date(start_ts, ref_col, data=df_sub)
+    end_ts   = next_nonzero_date(end_ts,   ref_col, data=df_sub)
 
     # 4. Subset dataframe
     mask_date = (df.index >= start_ts) & (df.index <= end_ts)
-    mask_stock = df["ticker"].isin(tickers)
     cols = ["ticker", "company_name"] + metrics
 
-    sub = df.loc[mask_date & mask_stock, cols].copy()
+    sub = df.loc[mask_date & stock_mask, cols].copy()
 
     if sub.empty:
         raise ValueError("No data for the requested combination of dates, stocks, and metrics.")
 
     return sub
+
 
