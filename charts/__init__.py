@@ -38,7 +38,7 @@ def strategy_dashboard(
     Returns:
         A ``plotly.graph_objects.Figure`` ready for display.
     """
-    # sma_50 is only added by the MA strategy — never present in raw parquet data.
+    # trade is only added by the MA strategy — never present in raw parquet data.
     # This is the unambiguous routing signal.
     if "trade" in results_df.columns:
         return _build_moving_average(results_df, summary, initial_capital)

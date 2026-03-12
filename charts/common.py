@@ -1,6 +1,6 @@
 """Shared chart utilities for TradeRewind.
 
-All functions here are pure – they mutate a Plotly figure passed in but
+All functions here are pure - they mutate a Plotly figure passed in but
 never own one themselves, making them easy to compose across strategy
 chart modules.
 """
@@ -13,7 +13,7 @@ def format_summary(summary: dict) -> dict:
     """Convert raw metric floats to human-readable strings.
 
     * Values whose key contains ``"return"`` or ``"%"`` are rendered as
-      percentages (``×100``, two decimal places).
+      percentages (``*100``, two decimal places).
     * All other floats get two decimal places.
     * Non-float values are converted with ``str()``.
 
