@@ -295,10 +295,10 @@ class TestMovingAverageCrossover:
         with pytest.raises(TypeError, match="numeric"):
             moving_average_crossover(_make_prices(MIN_ROWS_REQUIRED), "big", pd.DataFrame())
 
-    def test_no_crossover_stays_in_cash(self):
+    def test_no_crossover_stays_in_cash_original(self):
         df = _make_prices(300, close_values=[100.0] * 300)
         result = moving_average_crossover(df, 10000.0, pd.DataFrame())
-        assert (result["daily_value"] == pytest.approx(10000.0)).all()
+        assert result["daily_value"].values == pytest.approx(10000.0)
 
     def test_golden_cross_invests_capital(self):
         prices = _make_golden_cross_prices()
@@ -376,7 +376,7 @@ class TestBuyAndHold:
 
     def test_flat_prices_zero_profit(self):
         result = buy_and_hold(_make_prices(50, close_values=[100.0] * 50), 1000.0, pd.DataFrame())
-        assert (result["profit_to_date"] == pytest.approx(0.0)).all()
+        assert result["profit_to_date"].values == pytest.approx(0.0)
 
 # strategies.run_strategy dispatch
 class TestRunStrategy:
