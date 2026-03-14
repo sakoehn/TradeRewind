@@ -52,7 +52,7 @@ def main_backtest(
     prices = get_stock_history(stock, start_date, end_date, df)
     results = run_strategy(prices, strategy, initial_capital, df)
     summary = compute_metrics(results, initial_capital)
-    plot = strategy_dashboard(results, summary, initial_capital)
+    plot = strategy_dashboard(results, strategy, summary, initial_capital)
 
     return results, summary, plot
 
