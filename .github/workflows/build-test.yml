@@ -31,5 +31,5 @@ jobs:
 
       - name: Run pylint
         run: |
-          conda activate trade_rewind
+          conda activate tradeRewind
           pylint $(git ls-files '*.py')
