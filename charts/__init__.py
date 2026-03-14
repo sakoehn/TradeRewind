@@ -39,11 +39,10 @@ def strategy_dashboard(
     Returns:
         A ``plotly.graph_objects.Figure`` ready for display.
     """
-    # trade is only added by the MA strategy — never present in raw parquet data.
-    # This is the unambiguous routing signal.
-    if strategy == "buy and hold":
+    # Determines which type of visualization to create based on the strategy name.
+    if strategy.lower() == "buy and hold":
         return _build_buy_and_hold(results_df, summary, initial_capital)
-    elif strategy == "moving average crossover":
+    elif strategy.lower() == "moving average crossover":
         return _build_moving_average(results_df, summary, initial_capital)
     else:
         raise ValueError(
