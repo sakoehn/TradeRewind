@@ -25,6 +25,7 @@ import plotly.graph_objects as go
 
 def strategy_dashboard(
     results_df: pd.DataFrame,
+    strategy: str,
     summary: dict,
     initial_capital: float,
 ) -> go.Figure:
@@ -40,10 +41,14 @@ def strategy_dashboard(
     """
     # trade is only added by the MA strategy — never present in raw parquet data.
     # This is the unambiguous routing signal.
-    if "trade" in results_df.columns:
+    if strategy == "buy and hold":
+        return _build_buy_and_hold(results_df, summary, initial_capital)
+    elif strategy == "moving average crossover":
         return _build_moving_average(results_df, summary, initial_capital)
-
-    return _build_buy_and_hold(results_df, summary, initial_capital)
+    else:
+        raise ValueError(
+            f"{strategy} is not a valid strategy."
+        )
 
 
 __all__ = [
