@@ -62,4 +62,3 @@ def build(
     fig.update_yaxes(title_text="Portfolio Value ($)", row=1, col=1)
 
     return fig
-

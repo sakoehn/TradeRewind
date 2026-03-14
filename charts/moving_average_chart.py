@@ -175,4 +175,3 @@ def build(
     fig.update_xaxes(title_text="Date", row=2, col=1)
 
     return fig
-

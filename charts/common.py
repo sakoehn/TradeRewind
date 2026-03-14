@@ -8,11 +8,12 @@ chart modules.
 import pandas as pd
 import plotly.graph_objects as go
 
-# Metric labels: raw key -> human-readable display name
+# Metric labels: raw snake_case key -> human-readable display name
+# Used only by build_metrics_df. format_summary never renames keys.
 _METRIC_LABELS = {
     "total_return":          "Total Return",
     "annualized_return":     "Annualized Return",
-    "annualized_sharpe":     "Sharpe Ratio (Annualized)",
+    "annualized_sharpe":     "Sharpe Ratio (Ann.)",
     "max_drawdown":          "Max Drawdown",
     "annualized_volatility": "Annualized Volatility",
     "win_rate":              "Win Rate",
@@ -24,49 +25,62 @@ _METRIC_LABELS = {
     "sortino_ratio":         "Sortino Ratio",
 }
 
+# Keywords in a key that indicate the value should be shown as a percentage
+_PCT_KEYWORDS = {"return", "drawdown", "volatility", "rate"}
+
 
 def format_summary(summary: dict) -> dict:
     """Convert raw metric floats to human-readable strings.
 
-    * Values whose key contains ``"return"``, ``"drawdown"``,
-      ``"volatility"``, or ``"rate"`` are rendered as percentages.
-    * All other floats get two decimal places.
-    * Non-float values are converted with ``str()``.
+    Keys are **never renamed** — the output dict has the same keys as the
+    input. Only values are transformed:
+
+    * Keys containing ``"return"``, ``"drawdown"``, ``"volatility"``,
+      ``"rate"``, or starting/ending with ``"%"`` → percentage string
+      (value * 100, two decimal places).
+    * All other floats → two decimal places.
+    * Non-float values → ``str()``.
 
     Args:
         summary: Raw metrics dict (floats and other types).
 
     Returns:
-        New dict mapping human-readable labels to formatted string values.
+        New dict with identical keys and formatted string values.
     """
-    pct_keys = {"return", "drawdown", "volatility", "rate"}
     formatted: dict = {}
     for key, value in summary.items():
-        label = _METRIC_LABELS.get(key, key.replace("_", " ").title())
+        key_lower = key.lower().strip()
+        is_pct = (
+            any(p in key_lower for p in _PCT_KEYWORDS)
+            or key_lower.startswith("%")
+            or key_lower.endswith("%")
+        )
         if isinstance(value, float):
-            if any(p in key.lower() for p in pct_keys):
-                formatted[label] = f"{value * 100:.2f}%"
-            else:
-                formatted[label] = f"{value:.2f}"
+            formatted[key] = f"{value * 100:.2f}%" if is_pct else f"{value:.2f}"
         else:
-            formatted[label] = str(value)
+            formatted[key] = str(value)
     return formatted
 
 
 def build_metrics_df(summary: dict) -> pd.DataFrame:
-    """Convert a formatted summary dict into a two-column DataFrame.
+    """Convert a raw summary dict into a display-ready two-column DataFrame.
 
-    Intended for use with ``st.dataframe`` or ``st.table`` in home_page.py.
+    Applies ``format_summary`` for value formatting and ``_METRIC_LABELS``
+    for human-readable label names.  Intended for ``st.metric`` cards in
+    ``home_page.py``.
 
     Args:
-        summary: Already-formatted metrics dict produced by ``format_summary``.
+        summary: Raw metrics dict from ``compute_metrics``.
 
     Returns:
         DataFrame with columns ``["Metric", "Value"]``, one row per metric.
     """
-    return pd.DataFrame(
-        {"Metric": list(summary.keys()), "Value": list(summary.values())}
-    )
+    formatted = format_summary(summary)
+    rows = []
+    for key, value in formatted.items():
+        label = _METRIC_LABELS.get(key, key.replace("_", " ").title())
+        rows.append({"Metric": label, "Value": value})
+    return pd.DataFrame(rows)
 
 
 def add_portfolio_traces(
@@ -190,4 +204,3 @@ def prepare_plot_df(raw_df: pd.DataFrame) -> pd.DataFrame:
     plot_df = plot_df.dropna(subset=["daily_value", "daily_returns"])
     plot_df = plot_df.reset_index(drop=True)
     return plot_df
-

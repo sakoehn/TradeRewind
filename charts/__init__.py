@@ -71,4 +71,3 @@ __all__ = [
     "format_summary",
     "build_metrics_df",
 ]
-

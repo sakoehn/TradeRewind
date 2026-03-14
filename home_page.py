@@ -142,11 +142,9 @@ if submit_button:
 
     # Show results
     st.write("### Results")
- 
     # Full-width chart
     if fig is not None:
         st.plotly_chart(fig, use_container_width=True)
- 
     # Metrics cards — 3 per row
     if metrics_df is not None and not metrics_df.empty:
         st.write("#### Performance Metrics")
