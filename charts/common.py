@@ -8,12 +8,28 @@ chart modules.
 import pandas as pd
 import plotly.graph_objects as go
 
+# Metric labels: raw key -> human-readable display name
+_METRIC_LABELS = {
+    "total_return":          "Total Return",
+    "annualized_return":     "Annualized Return",
+    "annualized_sharpe":     "Sharpe Ratio (Annualized)",
+    "max_drawdown":          "Max Drawdown",
+    "annualized_volatility": "Annualized Volatility",
+    "win_rate":              "Win Rate",
+    "profit_factor":         "Profit Factor",
+    "avg_win":               "Average Win",
+    "avg_loss":              "Average Loss",
+    "total_trades":          "Total Trades",
+    "calmar_ratio":          "Calmar Ratio",
+    "sortino_ratio":         "Sortino Ratio",
+}
+
 
 def format_summary(summary: dict) -> dict:
     """Convert raw metric floats to human-readable strings.
 
-    * Values whose key contains ``"return"`` or ``"%"`` are rendered as
-      percentages (``*100``, two decimal places).
+    * Values whose key contains ``"return"``, ``"drawdown"``,
+      ``"volatility"``, or ``"rate"`` are rendered as percentages.
     * All other floats get two decimal places.
     * Non-float values are converted with ``str()``.
 
@@ -21,18 +37,36 @@ def format_summary(summary: dict) -> dict:
         summary: Raw metrics dict (floats and other types).
 
     Returns:
-        New dict with the same keys and string values.
+        New dict mapping human-readable labels to formatted string values.
     """
+    pct_keys = {"return", "drawdown", "volatility", "rate"}
     formatted: dict = {}
     for key, value in summary.items():
+        label = _METRIC_LABELS.get(key, key.replace("_", " ").title())
         if isinstance(value, float):
-            if "return" in key.lower() or "%" in key:
-                formatted[key] = f"{value * 100:.2f}%"
+            if any(p in key.lower() for p in pct_keys):
+                formatted[label] = f"{value * 100:.2f}%"
             else:
-                formatted[key] = f"{value:.2f}"
+                formatted[label] = f"{value:.2f}"
         else:
-            formatted[key] = str(value)
+            formatted[label] = str(value)
     return formatted
+
+
+def build_metrics_df(summary: dict) -> pd.DataFrame:
+    """Convert a formatted summary dict into a two-column DataFrame.
+
+    Intended for use with ``st.dataframe`` or ``st.table`` in home_page.py.
+
+    Args:
+        summary: Already-formatted metrics dict produced by ``format_summary``.
+
+    Returns:
+        DataFrame with columns ``["Metric", "Value"]``, one row per metric.
+    """
+    return pd.DataFrame(
+        {"Metric": list(summary.keys()), "Value": list(summary.values())}
+    )
 
 
 def add_portfolio_traces(
@@ -95,7 +129,7 @@ def add_portfolio_traces(
             col=col,
         )
 
-    # Annotation: maximum drawdown point 
+    # Annotation: maximum drawdown point
     if "drawdown" in plot_df.columns and not plot_df.empty:
         dd_idx = plot_df["drawdown"].idxmin()
         fig.add_trace(
@@ -133,40 +167,6 @@ def add_initial_capital_line(
         line_color="green",
         annotation_text="Initial Capital",
         annotation_position="bottom right",
-        row=row,
-        col=col,
-    )
-
-
-def add_metrics_table(
-    fig: go.Figure,
-    summary: dict,
-    row: int,
-    col: int,
-) -> None:
-    """Render the metrics summary as a Plotly table trace.
-
-    Args:
-        fig: Plotly figure to mutate.
-        summary: Already-formatted metrics dict (string values).
-        row: Subplot row index (1-based).
-        col: Subplot column index (1-based).
-    """
-    fig.add_trace(
-        go.Table(
-            header={
-                "values": ["Metric", "Value"],
-                "fill_color": "lightgrey",
-                "align": "left",
-            },
-            cells={
-                "values": [
-                    list(summary.keys()),
-                    list(summary.values()),
-                ],
-                "align": "left",
-            },
-        ),
         row=row,
         col=col,
     )
