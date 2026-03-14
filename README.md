@@ -1,6 +1,8 @@
 # Trade Rewind
-### Data 515 Final Project - UW
 #### Authors: Arlette Ngabonzima, Priyal Jain, Sophia Koehn, Scott Fry
+
+[![Coverage Status](https://coveralls.io/repos/github/sakoehn/TradeRewind/badge.svg)](https://coveralls.io/github/sakoehn/TradeRewind)
+[![build_test](https://github.com/sakoehn/TradeRewind/actions/workflows/build-test.yml/badge.svg)](https://github.com/sakoehn/TradeRewind/actions/workflows/build-test.yml)
 
 Project Type: Interactive Tool
 
