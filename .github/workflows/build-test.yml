@@ -1,0 +1,35 @@
+name: build_test
+
+on:
+  push:
+    branches:
+      - '**'   # runs on push to all branches
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+        run:
+          shell: bash -el {0} #to avoid conda init error
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: tradeRewind
+          auto-activate: true
+          environment-file: environment.yml
+
+      # - name: Install pylint (safety)
+      #   run: |
+      #     conda activate trade_rewind
+      #     pip install pylint
+
+      - name: Run pylint
+        run: |
+          conda activate trade_rewind
+          pylint $(git ls-files '*.py')
