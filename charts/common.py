@@ -8,31 +8,79 @@ chart modules.
 import pandas as pd
 import plotly.graph_objects as go
 
+# Metric labels: raw snake_case key -> human-readable display name
+# Used only by build_metrics_df. format_summary never renames keys.
+_METRIC_LABELS = {
+    "total_return":          "Total Return",
+    "annualized_return":     "Annualized Return",
+    "annualized_sharpe":     "Sharpe Ratio (Ann.)",
+    "max_drawdown":          "Max Drawdown",
+    "annualized_volatility": "Annualized Volatility",
+    "win_rate":              "Win Rate",
+    "profit_factor":         "Profit Factor",
+    "avg_win":               "Average Win",
+    "avg_loss":              "Average Loss",
+    "total_trades":          "Total Trades",
+    "calmar_ratio":          "Calmar Ratio",
+    "sortino_ratio":         "Sortino Ratio",
+}
+
+# Keywords in a key that indicate the value should be shown as a percentage
+_PCT_KEYWORDS = {"return", "drawdown", "volatility", "rate"}
+
 
 def format_summary(summary: dict) -> dict:
     """Convert raw metric floats to human-readable strings.
 
-    * Values whose key contains ``"return"`` or ``"%"`` are rendered as
-      percentages (``*100``, two decimal places).
-    * All other floats get two decimal places.
-    * Non-float values are converted with ``str()``.
+    Keys are **never renamed** — the output dict has the same keys as the
+    input. Only values are transformed:
+
+    * Keys containing ``"return"``, ``"drawdown"``, ``"volatility"``,
+      ``"rate"``, or starting/ending with ``"%"`` → percentage string
+      (value * 100, two decimal places).
+    * All other floats → two decimal places.
+    * Non-float values → ``str()``.
 
     Args:
         summary: Raw metrics dict (floats and other types).
 
     Returns:
-        New dict with the same keys and string values.
+        New dict with identical keys and formatted string values.
     """
     formatted: dict = {}
     for key, value in summary.items():
+        key_lower = key.lower().strip()
+        is_pct = (
+            any(p in key_lower for p in _PCT_KEYWORDS)
+            or key_lower.startswith("%")
+            or key_lower.endswith("%")
+        )
         if isinstance(value, float):
-            if "return" in key.lower() or "%" in key:
-                formatted[key] = f"{value * 100:.2f}%"
-            else:
-                formatted[key] = f"{value:.2f}"
+            formatted[key] = f"{value * 100:.2f}%" if is_pct else f"{value:.2f}"
         else:
             formatted[key] = str(value)
     return formatted
+
+
+def build_metrics_df(summary: dict) -> pd.DataFrame:
+    """Convert a raw summary dict into a display-ready two-column DataFrame.
+
+    Applies ``format_summary`` for value formatting and ``_METRIC_LABELS``
+    for human-readable label names.  Intended for ``st.metric`` cards in
+    ``home_page.py``.
+
+    Args:
+        summary: Raw metrics dict from ``compute_metrics``.
+
+    Returns:
+        DataFrame with columns ``["Metric", "Value"]``, one row per metric.
+    """
+    formatted = format_summary(summary)
+    rows = []
+    for key, value in formatted.items():
+        label = _METRIC_LABELS.get(key, key.replace("_", " ").title())
+        rows.append({"Metric": label, "Value": value})
+    return pd.DataFrame(rows)
 
 
 def add_portfolio_traces(
@@ -95,7 +143,7 @@ def add_portfolio_traces(
             col=col,
         )
 
-    # Annotation: maximum drawdown point 
+    # Annotation: maximum drawdown point
     if "drawdown" in plot_df.columns and not plot_df.empty:
         dd_idx = plot_df["drawdown"].idxmin()
         fig.add_trace(
@@ -138,40 +186,6 @@ def add_initial_capital_line(
     )
 
 
-def add_metrics_table(
-    fig: go.Figure,
-    summary: dict,
-    row: int,
-    col: int,
-) -> None:
-    """Render the metrics summary as a Plotly table trace.
-
-    Args:
-        fig: Plotly figure to mutate.
-        summary: Already-formatted metrics dict (string values).
-        row: Subplot row index (1-based).
-        col: Subplot column index (1-based).
-    """
-    fig.add_trace(
-        go.Table(
-            header={
-                "values": ["Metric", "Value"],
-                "fill_color": "lightgrey",
-                "align": "left",
-            },
-            cells={
-                "values": [
-                    list(summary.keys()),
-                    list(summary.values()),
-                ],
-                "align": "left",
-            },
-        ),
-        row=row,
-        col=col,
-    )
-
-
 def prepare_plot_df(raw_df: pd.DataFrame) -> pd.DataFrame:
     """Sanitise a strategy results DataFrame for plotting.
 
@@ -190,4 +204,3 @@ def prepare_plot_df(raw_df: pd.DataFrame) -> pd.DataFrame:
     plot_df = plot_df.dropna(subset=["daily_value", "daily_returns"])
     plot_df = plot_df.reset_index(drop=True)
     return plot_df
-
