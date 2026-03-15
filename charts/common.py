@@ -5,6 +5,8 @@ never own one themselves, making them easy to compose across strategy
 chart modules.
 """
 
+from typing import Any, Dict
+
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -29,7 +31,7 @@ _METRIC_LABELS = {
 _PCT_KEYWORDS = {"return", "drawdown", "volatility", "rate"}
 
 
-def format_summary(summary: dict) -> dict:
+def format_summary(summary: Dict[str, Any]) -> Dict[str, str]:
     """Convert raw metric floats to human-readable strings.
 
     Keys are **never renamed** — the output dict has the same keys as the
@@ -47,7 +49,7 @@ def format_summary(summary: dict) -> dict:
     Returns:
         New dict with identical keys and formatted string values.
     """
-    formatted: dict = {}
+    formatted: Dict[str, str] = {}
     for key, value in summary.items():
         key_lower = key.lower().strip()
         is_pct = (

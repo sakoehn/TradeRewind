@@ -187,7 +187,7 @@ def _simulate_trades(trade_df: pd.DataFrame, initial_capital: float) -> pd.DataF
 def moving_average_crossover(
     prices: pd.DataFrame,
     initial_capital: float,
-    full_df: pd.DataFrame,  # noqa: ARG001 - unused; kept for strategy API parity
+    full_df: pd.DataFrame,  # pylint: disable=unused-argument  # kept for strategy API parity
 ) -> pd.DataFrame:
     """Run the 50/200-day SMA crossover back-test on a single stock.
 
@@ -215,4 +215,3 @@ def moving_average_crossover(
     result = _simulate_trades(result, initial_capital)
 
     return result
-

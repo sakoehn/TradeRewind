@@ -1,6 +1,6 @@
-"""Backtester orchestration module.
+"""Backtester module.
 
-Wires together data loading, strategy dispatch, metric computation, and
+Brings together data loading, strategy dispatch, metric computation, and
 chart generation.
 
 Adding a new strategy requires **no changes here** - register it in
