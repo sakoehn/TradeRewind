@@ -6,6 +6,7 @@ This file is the Streamlit main script so the sidebar shows only Home + pages.
 
 import streamlit as st
 import pandas as pd
+import os
 
 from backtester import InvalidTickerError, main_backtest
 from data_loading import load_all_data
@@ -33,6 +34,13 @@ def _available_tickers():
 
 st.title("Trade Rewind")
 st.caption("A tool to understand stock backtesting.")
+
+# Display the logo at the top of the page
+logo_path = "logo.png"
+if os.path.exists(logo_path):
+    st.image(logo_path, width=700)
+else:
+    st.warning("Logo file not found. Please ensure 'logo.png' is in the project directory.")
 
 st.write("")
 st.write("#### Learn more")

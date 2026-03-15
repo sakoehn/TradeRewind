@@ -77,4 +77,3 @@ if __name__ == "__main__":
     test_load_all_data_success()
     test_load_all_data_no_files()
     test_load_all_data_file_content()
-    

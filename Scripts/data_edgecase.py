@@ -19,7 +19,6 @@ import pandas as pd
 
 DATA_DIR = '../data/'
 
-
 def load_one(filepath: str):
     """Load a single CSV stock file and return its row count and DataFrame.
 

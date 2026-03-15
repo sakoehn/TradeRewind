@@ -1,0 +1,43 @@
+# Styling configuration for Streamlit pages
+
+[theme]
+# Primary color for interactive elements
+primaryColor = "#1f77b4"
+
+# Background color for the main content area
+backgroundColor = "#f5f5f5"
+
+# Color for text and headings
+textColor = "#333333"
+
+# Font used for text
+font = "sans serif"
+
+[layout]
+# Set the page layout to wide or centered
+pageLayout = "wide"
+
+[header]
+# Header styling
+fontSize = "24px"
+fontWeight = "bold"
+
+[button]
+# Button styling
+borderRadius = "5px"
+hoverColor = "#0056b3"
+
+[inputs]
+# Input field styling
+borderColor = "#cccccc"
+focusColor = "#1f77b4"
+
+[logo]
+# Path to the logo image
+path = "logo.png"
+
+# Logo alignment on the page (e.g., left, center, right)
+alignment = "center"
+
+# Logo size (e.g., small, medium, large)
+size = "medium"
