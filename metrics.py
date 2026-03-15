@@ -4,10 +4,15 @@
 function and returns a flat dict of scalar metrics ready for display.
 """
 
+from typing import Any, Dict
+
 import numpy as np
+import pandas as pd
 
 
-def compute_metrics(results_df, initial_capital: float) -> dict:
+def compute_metrics(  # pylint: disable=too-many-locals
+    results_df: pd.DataFrame, initial_capital: float
+) -> Dict[str, Any]:
     """Compute a comprehensive set of back-test performance metrics.
 
     Args:

@@ -7,6 +7,8 @@ Produces a two-panel Plotly figure:
 * **Right panel** - scrollable metrics table.
 """
 
+from typing import Any, Dict
+
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -22,7 +24,7 @@ from charts.common import (
 
 def build(
     results_df: pd.DataFrame,
-    summary: dict,
+    summary: Dict[str, Any],
     initial_capital: float,
 ) -> go.Figure:
     """Build the Buy-and-Hold strategy dashboard.

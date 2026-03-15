@@ -356,9 +356,9 @@ class TestMovingAverageCrossover:
         )
         assert isinstance(result, pd.DataFrame)
 
-# buy_and_hold (regression)
+# buy_and_hold — full coverage
 class TestBuyAndHold:
-    """Regression tests to ensure buy_and_hold is unaffected by the refactor."""
+    """Tests for buy_and_hold: behaviour, output columns, edge cases, 100% coverage."""
 
     def test_position_constant(self):
         result = buy_and_hold(_make_prices(50), 1000.0, pd.DataFrame())
@@ -375,8 +375,117 @@ class TestBuyAndHold:
         )
 
     def test_flat_prices_zero_profit(self):
-        result = buy_and_hold(_make_prices(50, close_values=[100.0] * 50), 1000.0, pd.DataFrame())
-        assert (result["profit_to_date"] == pytest.approx(0.0)).all()
+        result = buy_and_hold(
+            _make_prices(50, close_values=[100.0] * 50), 1000.0, pd.DataFrame()
+        )
+        assert (result["profit_to_date"].abs() < 1e-12).all()
+
+    def test_returns_dataframe(self):
+        result = buy_and_hold(_make_prices(10), 1000.0, pd.DataFrame())
+        assert isinstance(result, pd.DataFrame)
+
+    def test_output_has_all_required_columns(self):
+        result = buy_and_hold(_make_prices(10), 5000.0, pd.DataFrame())
+        required = {"position", "price", "daily_value", "daily_returns", "profit_to_date", "drawdown"}
+        assert required.issubset(set(result.columns))
+
+    def test_price_equals_close(self):
+        df = _make_prices(20, close_values=[50.0 + i for i in range(20)])
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        pd.testing.assert_series_equal(result["price"], result["close"], check_names=False)
+
+    def test_shares_computed_from_first_close_and_capital(self):
+        df = _make_prices(5, close_values=[100.0, 102.0, 98.0, 105.0, 103.0])
+        result = buy_and_hold(df, 10000.0, pd.DataFrame())
+        expected_shares = 10000.0 / 100.0
+        assert result["position"].iloc[0] == pytest.approx(expected_shares)
+        assert (result["position"] == expected_shares).all()
+
+    def test_daily_value_first_day_equals_initial_capital(self):
+        df = _make_prices(10, close_values=[50.0] * 10)
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        assert result["daily_value"].iloc[0] == pytest.approx(1000.0)
+
+    def test_daily_returns_first_row_zero(self):
+        result = buy_and_hold(_make_prices(10), 1000.0, pd.DataFrame())
+        assert result["daily_returns"].iloc[0] == pytest.approx(0.0)
+
+    def test_daily_returns_pct_change_after_first(self):
+        df = _make_prices(5, close_values=[100.0, 110.0, 105.0, 115.0, 120.0])
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        assert result["daily_returns"].iloc[0] == pytest.approx(0.0)
+        assert result["daily_returns"].iloc[1] == pytest.approx(0.1)
+        assert result["daily_returns"].iloc[2] == pytest.approx(-0.0454545, rel=1e-4)
+
+    def test_profit_to_date_equals_daily_value_minus_capital(self):
+        df = _make_prices(20, close_values=[100.0 + i * 2 for i in range(20)])
+        result = buy_and_hold(df, 5000.0, pd.DataFrame())
+        expected = result["daily_value"] - 5000.0
+        pd.testing.assert_series_equal(
+            result["profit_to_date"].reset_index(drop=True),
+            expected.reset_index(drop=True),
+            check_names=False,
+        )
+
+    def test_drawdown_non_positive(self):
+        df = _make_prices(30, close_values=[100.0 - i for i in range(30)])
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        assert (result["drawdown"] <= 0).all()
+
+    def test_drawdown_zero_at_peak(self):
+        df = _make_prices(20, close_values=[100.0 + i for i in range(20)])
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        assert result["drawdown"].iloc[-1] == pytest.approx(0.0, abs=1e-12)
+
+    def test_drawdown_formula_cummax(self):
+        df = _make_prices(5, close_values=[100.0, 90.0, 95.0, 85.0, 100.0])
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        expected = result["daily_value"] / result["daily_value"].cummax() - 1
+        pd.testing.assert_series_equal(
+            result["drawdown"].reset_index(drop=True),
+            expected.reset_index(drop=True),
+            check_names=False,
+        )
+
+    def test_input_not_mutated(self):
+        df = _make_prices(10)
+        original_cols = set(df.columns)
+        buy_and_hold(df, 1000.0, pd.DataFrame())
+        assert set(df.columns) == original_cols
+
+    def test_output_length_matches_input(self):
+        df = _make_prices(100)
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        assert len(result) == len(df)
+
+    def test_single_row_dataframe(self):
+        df = _make_prices(1, close_values=[200.0])
+        result = buy_and_hold(df, 1000.0, pd.DataFrame())
+        assert len(result) == 1
+        assert result["position"].iloc[0] == pytest.approx(5.0)
+        assert result["daily_value"].iloc[0] == pytest.approx(1000.0)
+        assert result["daily_returns"].iloc[0] == pytest.approx(0.0)
+        assert result["drawdown"].iloc[0] == pytest.approx(0.0)
+
+    def test_full_df_parameter_accepted_unused(self):
+        full = pd.DataFrame({"ticker": ["AAPL"], "close": [100.0]})
+        result = buy_and_hold(_make_prices(5), 1000.0, full)
+        assert "daily_value" in result.columns
+        assert result["daily_value"].iloc[0] == pytest.approx(1000.0)
+
+    def test_rising_prices_positive_profit_at_end(self):
+        df = _make_prices(20, close_values=[100.0 + i * 5 for i in range(20)])
+        result = buy_and_hold(df, 10000.0, pd.DataFrame())
+        assert result["profit_to_date"].iloc[-1] > 0
+
+    def test_falling_prices_negative_profit_at_end(self):
+        df = _make_prices(20, close_values=[200.0 - i * 5 for i in range(20)])
+        result = buy_and_hold(df, 10000.0, pd.DataFrame())
+        assert result["profit_to_date"].iloc[-1] < 0
+
+    def test_float_initial_capital(self):
+        result = buy_and_hold(_make_prices(10), 2500.5, pd.DataFrame())
+        assert result["daily_value"].iloc[0] == pytest.approx(2500.5)
 
 # strategies.run_strategy dispatch
 class TestRunStrategy:

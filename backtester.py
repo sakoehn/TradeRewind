@@ -50,8 +50,8 @@ def main_backtest(
         raise InvalidTickerError(f"No data found for ticker '{stock}'.")
 
     prices = get_stock_history(stock, start_date, end_date, df)
-    results = run_strategy(prices, strategy, initial_capital, df)
-    summary = compute_metrics(results, initial_capital)
+    results = run_strategy(prices, strategy, initial_capital, df)  # pylint: disable=redefined-outer-name
+    summary = compute_metrics(results, initial_capital)  # pylint: disable=redefined-outer-name
     plot = strategy_dashboard(results, summary, initial_capital)
 
     return results, summary, plot

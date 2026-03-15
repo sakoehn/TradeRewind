@@ -5,11 +5,13 @@ never own one themselves, making them easy to compose across strategy
 chart modules.
 """
 
+from typing import Any, Dict
+
 import pandas as pd
 import plotly.graph_objects as go
 
 
-def format_summary(summary: dict) -> dict:
+def format_summary(summary: Dict[str, Any]) -> Dict[str, str]:
     """Convert raw metric floats to human-readable strings.
 
     * Values whose key contains ``"return"`` or ``"%"`` are rendered as
@@ -23,7 +25,7 @@ def format_summary(summary: dict) -> dict:
     Returns:
         New dict with the same keys and string values.
     """
-    formatted: dict = {}
+    formatted: Dict[str, str] = {}
     for key, value in summary.items():
         if isinstance(value, float):
             if "return" in key.lower() or "%" in key:
@@ -95,7 +97,7 @@ def add_portfolio_traces(
             col=col,
         )
 
-    # Annotation: maximum drawdown point 
+    # Annotation: maximum drawdown point
     if "drawdown" in plot_df.columns and not plot_df.empty:
         dd_idx = plot_df["drawdown"].idxmin()
         fig.add_trace(
@@ -140,7 +142,7 @@ def add_initial_capital_line(
 
 def add_metrics_table(
     fig: go.Figure,
-    summary: dict,
+    summary: Dict[str, str],
     row: int,
     col: int,
 ) -> None:
@@ -190,4 +192,3 @@ def prepare_plot_df(raw_df: pd.DataFrame) -> pd.DataFrame:
     plot_df = plot_df.dropna(subset=["daily_value", "daily_returns"])
     plot_df = plot_df.reset_index(drop=True)
     return plot_df
-

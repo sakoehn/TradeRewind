@@ -5,15 +5,14 @@ import os
 import pandas as pd
 
 
-def load_all_data():
-    """
-    Load all Parquet files from the ./data directory and concatenate them.
+def load_all_data() -> pd.DataFrame:
+    """Load all Parquet files from the ./data directory and concatenate them.
 
     Raises:
         ValueError: If no Parquet files are found.
 
     Returns:
-        pandas.DataFrame: Combined dataframe of all loaded Parquet files.
+        Combined DataFrame of all loaded Parquet files.
     """
     parquet_paths = glob.glob(os.path.join("data", "*.parquet"))
     all_stocks = []

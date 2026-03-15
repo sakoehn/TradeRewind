@@ -1,0 +1,15 @@
+# TradeRewind – light, modern theme (user-friendly)
+# https://docs.streamlit.io/develop/concepts/configuration
+
+[theme]
+primaryColor = "#059669"
+backgroundColor = "#f8fafc"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1e293b"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

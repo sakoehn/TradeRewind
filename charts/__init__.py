@@ -15,17 +15,19 @@ Adding a chart for a new strategy
 3. Add a detection condition inside ``strategy_dashboard``.
 """
 
-from charts.common import format_summary, add_portfolio_traces, add_metrics_table
-from charts.buy_and_hold_chart import build as _build_buy_and_hold
-from charts.moving_average_chart import build as _build_moving_average
+from typing import Any, Dict
 
 import pandas as pd
 import plotly.graph_objects as go
 
+from charts.buy_and_hold_chart import build as _build_buy_and_hold
+from charts.common import add_metrics_table, add_portfolio_traces, format_summary
+from charts.moving_average_chart import build as _build_moving_average
+
 
 def strategy_dashboard(
     results_df: pd.DataFrame,
-    summary: dict,
+    summary: Dict[str, Any],
     initial_capital: float,
 ) -> go.Figure:
     """Route to the correct chart builder based on strategy output columns.
@@ -52,4 +54,3 @@ __all__ = [
     "add_portfolio_traces",
     "add_metrics_table",
 ]
-

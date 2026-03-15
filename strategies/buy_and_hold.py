@@ -21,7 +21,7 @@ import pandas as pd
 def buy_and_hold(
     prices: pd.DataFrame,
     initial_capital: float,
-    full_df: pd.DataFrame,  # noqa: ARG001 - unused; kept for strategy API parity
+    full_df: pd.DataFrame,  # pylint: disable=unused-argument  # kept for strategy API 
 ) -> pd.DataFrame:
     """Buy all shares on day 1 and hold until the end of the period.
 
@@ -29,10 +29,10 @@ def buy_and_hold(
         prices: Date-filtered, single-stock DataFrame with a ``close`` column.
         initial_capital: Starting cash in dollars.
         full_df: Full combined dataset; unused but required by the strategy API
-            so all strategies share the same call signature.
+            so all strategies share the same call struture for reusability.
 
     Returns:
-        Enriched DataFrame with strategy columns appended.
+        DataFrame with strategy columns appended.
     """
     result = prices.copy()
 

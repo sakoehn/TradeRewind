@@ -10,6 +10,8 @@ Produces a three-panel Plotly figure:
 * **Right panel** (spanning both rows) - scrollable metrics table.
 """
 
+from typing import Any, Dict
+
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -74,6 +76,7 @@ def _add_price_and_sma_traces(
         col=col,
     )
 
+
 def _add_trade_markers(
     fig: go.Figure,
     trade_df: pd.DataFrame,
@@ -125,7 +128,7 @@ def _add_trade_markers(
 # Public chart builder
 def build(
     results_df: pd.DataFrame,
-    summary: dict,
+    summary: Dict[str, Any],
     initial_capital: float,
 ) -> go.Figure:
     """Build the Moving Average Crossover strategy dashboard.
@@ -160,11 +163,11 @@ def build(
         ],
     )
 
-    # Row 1: portfolio performance 
+    # Row 1: portfolio performance
     add_portfolio_traces(fig, plot_df, row=1, col=1)
     add_initial_capital_line(fig, initial_capital, row=1, col=1)
 
-    # Row 2: price + SMA overlay + trade markers 
+    # Row 2: price + SMA overlay + trade markers
     _add_price_and_sma_traces(fig, plot_df, row=2, col=1)
     _add_trade_markers(fig, plot_df, row=2, col=1)
 
@@ -179,4 +182,3 @@ def build(
     )
 
     return fig
-
