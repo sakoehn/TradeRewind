@@ -1,6 +1,6 @@
-"""Backtester orchestration module.
+"""Backtester module.
 
-Wires together data loading, strategy dispatch, metric computation, and
+Brings together data loading, strategy dispatch, metric computation, and
 chart generation.
 
 Adding a new strategy requires **no changes here** - register it in
@@ -40,7 +40,7 @@ def main_backtest(
         initial_capital: Starting cash in dollars.
 
     Returns:
-        Tuple of ``(results_df, summary_dict, plotly_figure)``.
+        Tuple of ``(results_df, summary_dict, plotly_figure, metrics_df)``.
 
     Raises:
         InvalidTickerError: If no data is found for *stock*.
@@ -50,15 +50,15 @@ def main_backtest(
         raise InvalidTickerError(f"No data found for ticker '{stock}'.")
 
     prices = get_stock_history(stock, start_date, end_date, df)
-    results = run_strategy(prices, strategy, initial_capital, df)  # pylint: disable=redefined-outer-name
-    summary = compute_metrics(results, initial_capital)  # pylint: disable=redefined-outer-name
-    plot = strategy_dashboard(results, summary, initial_capital)
+    results = run_strategy(prices, strategy, initial_capital, df)
+    summary = compute_metrics(results, initial_capital)
+    fig, metrics_df = strategy_dashboard(results, strategy, summary, initial_capital)
 
-    return results, summary, plot
+    return results, summary, fig, metrics_df
 
 
 if __name__ == "__main__":
-    results, summary, _ = main_backtest(
+    results, summary, fig, metrics_df = main_backtest(
         stock="AAPL",
         start_date="2010-01-01",
         end_date="2026-02-19",
@@ -74,3 +74,4 @@ if __name__ == "__main__":
         ].head(10)
     )
     print(summary)
+    print(metrics_df)

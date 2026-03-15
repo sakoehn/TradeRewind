@@ -1,16 +1,17 @@
 """Chart builder for the Moving Average Crossover strategy.
 
-Produces a three-panel Plotly figure:
+Produces a full-width two-panel Plotly figure:
 
-* **Top-left panel**   - portfolio value, daily returns, profit-to-date, and
+* **Top panel** — portfolio value, daily returns, profit-to-date, and
   drawdown over time, with peak and max-drawdown annotations.
-* **Bottom-left panel** - close price overlaid with SMA-50 (blue) and
+* **Bottom panel** — close price overlaid with SMA-50 (blue) and
   SMA-200 (orange), plus green ▲ buy markers and red ▼ sell markers on
   every Golden / Death Cross day.
-* **Right panel** (spanning both rows) - scrollable metrics table.
-"""
 
-from typing import Any, Dict
+The metrics table is rendered separately by the caller (home_page.py)
+using ``charts.common.format_summary`` so it can be displayed below the
+chart at full width.
+"""
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -18,13 +19,11 @@ from plotly.subplots import make_subplots
 
 from charts.common import (
     add_initial_capital_line,
-    add_metrics_table,
     add_portfolio_traces,
-    format_summary,
     prepare_plot_df,
 )
 
-# MA-specific trace builders
+
 def _add_price_and_sma_traces(
     fig: go.Figure,
     sma_df: pd.DataFrame,
@@ -125,42 +124,33 @@ def _add_trade_markers(
             col=col,
         )
 
-# Public chart builder
+
 def build(
     results_df: pd.DataFrame,
-    summary: Dict[str, Any],
+    summary: dict,  # noqa: ARG001 — unused here; rendered separately by caller
     initial_capital: float,
 ) -> go.Figure:
-    """Build the Moving Average Crossover strategy dashboard.
+    """Build the Moving Average Crossover chart (full width, no table).
 
     Args:
         results_df: Strategy results DataFrame from ``moving_average_crossover()``.
             Must contain ``sma_50``, ``sma_200``, ``trade``, and ``close``.
-        summary: Metrics dict from ``compute_metrics()``.
+        summary: Metrics dict (unused here; rendered separately by caller).
         initial_capital: Starting cash used for the reference line.
 
     Returns:
-        A ``plotly.graph_objects.Figure`` ready for ``st.plotly_chart``.
+        A full-width ``plotly.graph_objects.Figure`` ready for
+        ``st.plotly_chart(fig, use_container_width=True)``.
     """
     plot_df = prepare_plot_df(results_df)
-    formatted = format_summary(summary)
 
     fig = make_subplots(
         rows=2,
-        cols=2,
-        column_widths=[0.7, 0.3],
+        cols=1,
         row_heights=[0.5, 0.5],
-        specs=[
-            [{"type": "scatter"}, {"type": "domain", "rowspan": 2}],
-            [{"type": "scatter"}, None],
-        ],
-        horizontal_spacing=0.05,
+        shared_xaxes=True,
         vertical_spacing=0.08,
-        subplot_titles=[
-            "Portfolio Value",
-            "",                      # metrics table header (auto-placed)
-            "Price & Moving Averages",
-        ],
+        subplot_titles=["Portfolio Performance", "Price & Moving Averages"],
     )
 
     # Row 1: portfolio performance
@@ -171,14 +161,17 @@ def build(
     _add_price_and_sma_traces(fig, plot_df, row=2, col=1)
     _add_trade_markers(fig, plot_df, row=2, col=1)
 
-    # Right column: metrics table (spans both rows)
-    add_metrics_table(fig, formatted, row=1, col=2)
-
     fig.update_layout(
-        title="Moving Average Crossover (50 / 200 day) - Strategy Dashboard",
+        title="Moving Average Crossover (50 / 200 day) — Strategy Dashboard",
         template="plotly_white",
         hovermode="x unified",
         showlegend=True,
+        height=750,
+        margin={"t": 80, "b": 40, "l": 60, "r": 40},
     )
+
+    fig.update_yaxes(title_text="Portfolio Value ($)", row=1, col=1)
+    fig.update_yaxes(title_text="Price ($)", row=2, col=1)
+    fig.update_xaxes(title_text="Date", row=2, col=1)
 
     return fig

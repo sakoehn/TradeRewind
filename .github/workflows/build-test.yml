@@ -1,0 +1,63 @@
+name: build_test
+
+on:
+  push:
+    branches:
+      - '**'   # runs on push to all branches
+  pull_request:
+    branches:
+      - main   # coveralls posts a PR comment when targeting main
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -el {0}   # required for conda activate to work
+
+    steps:
+      # 1. Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Build conda environment from environment.yml
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: tradeRewind
+          auto-activate-base: false
+          environment-file: environment.yml
+          auto-update-conda: true
+
+      # 3. Install dev-only tools
+      - name: Install development dependencies
+        run: |
+          pip install pylint pytest pytest-cov coveralls
+
+      # 4. Add project root to PYTHONPATH so imports resolve
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+
+      # 5. Lint — fail only if score drops below 9.0/10
+      - name: Lint with pylint
+        run: |
+          pylint $(git ls-files '*.py') --fail-under=9.0
+
+      # 6. Run tests with coverage
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/ -v \
+            --cov=strategies \
+            --cov=charts \
+            --cov=backtester \
+            --cov=metrics \
+            --cov-report=term-missing \
+            --cov-report=lcov:coverage.lcov
+
+      # 7. Report to Coveralls
+      - name: Report coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          path-to-lcov: coverage.lcov

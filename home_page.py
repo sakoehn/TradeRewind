@@ -132,7 +132,7 @@ if submit_button:
 
     # Run backtest
     try:
-        results, summary, fig = main_backtest(
+        results, summary, fig, metrics_df = main_backtest(
             stock=user_stock.upper().strip(),
             start_date=start_arg,
             end_date=end_arg,
@@ -186,7 +186,16 @@ if submit_button:
 
     # Show results
     st.write("### Results")
+    # Full-width chart
     if fig is not None:
         st.plotly_chart(fig, use_container_width=True)
-    if results is not None:
-        st.dataframe(results.head(), use_container_width=True)
+    # Metrics cards — 3 per row
+    if metrics_df is not None and not metrics_df.empty:
+        st.write("#### Performance Metrics")
+        metrics = list(metrics_df.itertuples(index=False, name=None))
+        cols_per_row = 3
+        for row_start in range(0, len(metrics), cols_per_row):
+            row_metrics = metrics[row_start: row_start + cols_per_row]
+            cols = st.columns(cols_per_row)
+            for col, (metric, value) in zip(cols, row_metrics):
+                col.metric(label=metric, value=value)
