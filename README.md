@@ -157,7 +157,7 @@ conda activate traderewind
 With the environment set up, you can now run the application using Streamlit:
 
 ```bash
-streamlit run home_page.py
+streamlit run app.py
 ```
 
 This will launch the TradeRewind application in your default web browser. Navigate to `http://localhost:8501` to interact with the tool.
