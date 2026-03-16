@@ -6,7 +6,6 @@ This file is the Streamlit main script so the sidebar shows only Home + pages.
 
 import streamlit as st
 import pandas as pd
-import os
 
 from backtester import InvalidTickerError, main_backtest
 from data_loading import load_all_data

@@ -21,7 +21,7 @@ import pandas as pd
 def buy_and_hold(
     prices: pd.DataFrame,
     initial_capital: float,
-    full_df: pd.DataFrame,  # pylint: disable=unused-argument  # kept for strategy API 
+    full_df: pd.DataFrame,  # pylint: disable=unused-argument  # kept for strategy API
 ) -> pd.DataFrame:
     """Buy all shares on day 1 and hold until the end of the period.
 

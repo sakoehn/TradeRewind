@@ -9,10 +9,12 @@ Run with::
 
     python tests_dataloading.py
 """
-
-import os
-import pandas as pd
+# pylint: disable=unused-argument
 import glob
+import os
+
+import pandas as pd
+
 from data_loading import load_all_data
 
 def setup_parquet_files(tmp_path):

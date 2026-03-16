@@ -7,6 +7,7 @@ Run with::
 
     python tests_UI.py
 """
+# pylint: disable=unused-argument
 
 import unittest
 from unittest.mock import patch, MagicMock

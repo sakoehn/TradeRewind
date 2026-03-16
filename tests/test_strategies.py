@@ -45,8 +45,6 @@ from strategies.moving_average import (
 )
 from strategies.buy_and_hold import buy_and_hold
 from strategies.momentum import (
-    DEFAULT_LOOKBACK_DAYS,
-    DEFAULT_TRADE_PROPORTION,
     _validate_inputs as _momentum_validate_inputs,
     _compute_momentum_trades,
     _simulate_momentum_trades,

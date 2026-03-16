@@ -24,7 +24,7 @@ from charts.common import (
 
 def build(
     results_df: pd.DataFrame,
-    summary: dict,  # noqa: ARG001 — unused here; kept for API parity
+    summary: dict,  #noqa: ARG001 — unused here; kept for API parity
     initial_capital: float,
 ) -> go.Figure:
     """Build the Buy-and-Hold strategy chart (full width, no table).

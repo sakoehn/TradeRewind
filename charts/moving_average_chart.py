@@ -127,7 +127,7 @@ def _add_trade_markers(
 
 def build(
     results_df: pd.DataFrame,
-    summary: dict,  # noqa: ARG001 — unused here; rendered separately by caller
+    summary: dict,  #noqa: ARG001 — unused here; rendered separately by caller
     initial_capital: float,
 ) -> go.Figure:
     """Build the Moving Average Crossover chart (full width, no table).

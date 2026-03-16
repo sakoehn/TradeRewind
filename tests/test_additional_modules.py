@@ -10,19 +10,46 @@ Run with::
 
     python -m pytest tests/test_full_coverage.py -v --tb=short
 """
+# pylint: disable=unused-argument
 
-import math
-import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
+from charts.common import prepare_plot_df
+from charts import strategy_dashboard
+from charts.buy_and_hold_chart import build as bah_build
+from charts.common import(
+    add_initial_capital_line,
+    add_portfolio_traces,
+    build_metrics_df,
+)
+from csv_to_parquet import convert_csv_file, convert_folder
+from data_loading import load_all_data
+from metrics import compute_metrics
+from strategies import display_name_to_key, get_strategy_display_names
+from strategies.moving_average import moving_average_crossover
+from strategies.buy_and_hold import buy_and_hold
+from backtester import main_backtest, InvalidTickerError
+from stock_history import(
+    validate_stock,
+    validate_date,
+    get_stock_history,
+    build_market_series,
+    next_nonzero_date,
+)
+from ui_shared import render_logo, apply_shared_ui
+from charts.moving_average_chart import(
+    build as ma_build,
+    _add_price_and_sma_traces,
+    _add_trade_markers,
+)
+from ui_shared import inject_custom_style
 # Helpers
 
 def _make_prices(n, close_values=None, ticker="AAPL", company="Apple Inc."):
@@ -57,9 +84,6 @@ def _make_full_df():
 
 
 # metrics.py
-from metrics import compute_metrics
-
-
 class TestComputeMetrics(unittest.TestCase):
     """Verify compute_metrics produces correct metric types and values
     from an enriched strategy DataFrame."""
@@ -103,9 +127,6 @@ class TestComputeMetrics(unittest.TestCase):
 
 
 # data_loading.py
-from data_loading import load_all_data
-
-
 class TestLoadAllData(unittest.TestCase):
     """Verify load_all_data reads parquet files and handles missing data."""
 
@@ -123,15 +144,6 @@ class TestLoadAllData(unittest.TestCase):
 
 
 # stock_history.py
-from stock_history import (
-    validate_stock,
-    validate_date,
-    get_stock_history,
-    build_market_series,
-    next_nonzero_date,
-)
-
-
 class TestValidateStock(unittest.TestCase):
     """Verify validate_stock resolves tickers and company names correctly."""
 
@@ -322,7 +334,6 @@ class TestNextNonzeroDate(unittest.TestCase):
         with self.assertRaises(ValueError):
             next_nonzero_date(s.index[0], s)
 
-
 # backtester.py
 class TestBacktester(unittest.TestCase):
     """Verify main_backtest orchestrates the pipeline and handles bad data."""
@@ -334,8 +345,6 @@ class TestBacktester(unittest.TestCase):
     @patch("backtester.strategy_dashboard")
     def test_main_backtest_returns_tuple(self, mock_dash, mock_met, mock_strat, mock_hist):
         """A successful backtest should return (results_df, summary_dict, figure, metrics_df)."""
-        from backtester import main_backtest
-
         prices = _make_prices(50)
         results = prices.copy()
         results["daily_value"] = 10000.0
@@ -353,22 +362,16 @@ class TestBacktester(unittest.TestCase):
     @patch("backtester.df", pd.DataFrame())
     def test_main_backtest_empty_df_raises(self):
         """An empty module-level DataFrame should raise InvalidTickerError."""
-        from backtester import main_backtest, InvalidTickerError
         with self.assertRaises(InvalidTickerError):
             main_backtest("AAPL", None, None, "Buy and Hold", 10000.0)
 
     @patch("backtester.df", None)
     def test_main_backtest_none_df_raises(self):
         """A None module-level DataFrame should raise InvalidTickerError."""
-        from backtester import main_backtest, InvalidTickerError
         with self.assertRaises(InvalidTickerError):
             main_backtest("AAPL", None, None, "Buy and Hold", 10000.0)
 
-
 # csv_to_parquet.py
-from csv_to_parquet import convert_csv_file, convert_folder
-
-
 class TestCsvToParquet(unittest.TestCase):
     """Verify CSV-to-Parquet conversion for single files and entire folders."""
 
@@ -402,7 +405,6 @@ class TestCsvToParquet(unittest.TestCase):
             convert_folder(in_dir, out_dir)
             self.assertTrue(out_dir.exists())
 
-
 # ui_shared.py
 class TestUiShared(unittest.TestCase):
     """Verify Streamlit UI helpers inject CSS and render the logo correctly."""
@@ -410,7 +412,6 @@ class TestUiShared(unittest.TestCase):
     @patch("ui_shared.st")
     def test_inject_custom_style(self, mock_st):
         """inject_custom_style should call st.markdown exactly once with the CSS."""
-        from ui_shared import inject_custom_style
         inject_custom_style()
         mock_st.markdown.assert_called_once()
 
@@ -418,7 +419,6 @@ class TestUiShared(unittest.TestCase):
     @patch("ui_shared.os.path.isfile", return_value=False)
     def test_render_logo_missing(self, mock_isfile, mock_st):
         """When the logo file doesn't exist, st.image should not be called."""
-        from ui_shared import render_logo
         render_logo()
         mock_st.image.assert_not_called()
 
@@ -426,7 +426,6 @@ class TestUiShared(unittest.TestCase):
     @patch("ui_shared.os.path.isfile", return_value=True)
     def test_render_logo_present(self, mock_isfile, mock_st):
         """When the logo file exists, render_logo should set up columns and display it."""
-        from ui_shared import render_logo
         col_mock = MagicMock()
         mock_st.columns.return_value = [MagicMock(), col_mock, MagicMock()]
         render_logo()
@@ -436,21 +435,12 @@ class TestUiShared(unittest.TestCase):
     @patch("ui_shared.os.path.isfile", return_value=True)
     def test_apply_shared_ui(self, mock_isfile, mock_st):
         """apply_shared_ui should inject CSS and attempt to render the logo."""
-        from ui_shared import apply_shared_ui
         col_mock = MagicMock()
         mock_st.columns.return_value = [MagicMock(), col_mock, MagicMock()]
         apply_shared_ui()
         mock_st.markdown.assert_called_once()
 
-
 # strategies/__init__.py — remaining lines
-from strategies import (
-    get_strategy_display_names,
-    display_name_to_key,
-    DISPLAY_NAMES,
-)
-
-
 class TestStrategiesInit(unittest.TestCase):
     """Verify strategy registry helpers for UI dropdowns and dispatch."""
 
@@ -477,15 +467,7 @@ class TestStrategiesInit(unittest.TestCase):
         result = display_name_to_key("Some Unknown Strategy")
         self.assertEqual(result, "some unknown strategy")
 
-
 # charts/common.py
-from charts.common import (
-    build_metrics_df,
-    add_portfolio_traces,
-    add_initial_capital_line,
-)
-
-
 class TestBuildMetricsDf(unittest.TestCase):
     """Verify build_metrics_df converts a raw summary dict into a display table."""
 
@@ -501,12 +483,10 @@ class TestBuildMetricsDf(unittest.TestCase):
         df = build_metrics_df({"total_return": 0.1})
         self.assertEqual(df.iloc[0]["Metric"], "Total Return")
 
-
 class TestAddPortfolioTraces(unittest.TestCase):
     """Verify add_portfolio_traces adds the expected Plotly traces to a figure."""
 
     def _make_fig(self):
-        from plotly.subplots import make_subplots
         return make_subplots(rows=1, cols=1)
 
     def _make_plot_df(self, n=20):
@@ -540,34 +520,26 @@ class TestAddPortfolioTraces(unittest.TestCase):
         add_portfolio_traces(fig, df, 1, 1)
         self.assertEqual(len(fig.data), 0)
 
-
 class TestAddInitialCapitalLine(unittest.TestCase):
     """Verify add_initial_capital_line draws a reference line on the figure."""
 
     def test_adds_hline(self):
         """Calling the function should not error; the line is stored in layout shapes."""
-        from plotly.subplots import make_subplots
         fig = make_subplots(rows=1, cols=1)
         add_initial_capital_line(fig, 10000.0, 1, 1)
 
-
 # charts/__init__.py — strategy_dashboard
-from charts import strategy_dashboard
-
-
 class TestStrategyDashboard(unittest.TestCase):
     """Verify strategy_dashboard routes to the correct chart builder."""
 
     def _make_bah_results(self):
         df = _make_prices(50, close_values=[100.0 + i for i in range(50)])
-        from strategies.buy_and_hold import buy_and_hold
         return buy_and_hold(df, 10000.0, pd.DataFrame())
 
     def _make_ma_results(self):
         n = 300
         prices = list(range(1, n + 1))
         df = _make_prices(n, close_values=prices)
-        from strategies.moving_average import moving_average_crossover
         return moving_average_crossover(df, 10000.0, pd.DataFrame())
 
     def _summary(self, results):
@@ -598,31 +570,18 @@ class TestStrategyDashboard(unittest.TestCase):
         fig, _ = strategy_dashboard(r, "  buy and hold  ", self._summary(r), 10000.0)
         self.assertIsInstance(fig, go.Figure)
 
-
 # charts/buy_and_hold_chart.py
-from charts.buy_and_hold_chart import build as bah_build
-
-
 class TestBuyAndHoldChart(unittest.TestCase):
     """Verify the Buy-and-Hold chart builder produces a valid Plotly figure."""
 
     def test_build_returns_figure(self):
         """build() should return a go.Figure with portfolio traces and a capital line."""
         df = _make_prices(50, close_values=[100.0 + i for i in range(50)])
-        from strategies.buy_and_hold import buy_and_hold
         results = buy_and_hold(df, 10000.0, pd.DataFrame())
         fig = bah_build(results, {"Total Return": 0.1}, 10000.0)
         self.assertIsInstance(fig, go.Figure)
 
-
 # charts/moving_average_chart.py
-from charts.moving_average_chart import (
-    build as ma_build,
-    _add_price_and_sma_traces,
-    _add_trade_markers,
-)
-
-
 class TestMovingAverageChart(unittest.TestCase):
     """Verify the Moving Average chart builder and its helper functions."""
 
@@ -630,7 +589,6 @@ class TestMovingAverageChart(unittest.TestCase):
         n = 300
         prices = list(range(1, n + 1))
         df = _make_prices(n, close_values=prices)
-        from strategies.moving_average import moving_average_crossover
         return moving_average_crossover(df, 10000.0, pd.DataFrame())
 
     def test_build_returns_figure(self):
@@ -641,27 +599,22 @@ class TestMovingAverageChart(unittest.TestCase):
 
     def test_add_price_and_sma_traces(self):
         """Should add exactly 3 traces: close price, SMA-50, and SMA-200."""
-        from plotly.subplots import make_subplots
         fig = make_subplots(rows=1, cols=1)
         r = self._results()
-        from charts.common import prepare_plot_df
         plot_df = prepare_plot_df(r)
         _add_price_and_sma_traces(fig, plot_df, 1, 1)
         self.assertEqual(len(fig.data), 3)
 
     def test_add_trade_markers_with_trades(self):
         """When buy signals exist in the data, at least one buy marker trace should be added."""
-        from plotly.subplots import make_subplots
         fig = make_subplots(rows=1, cols=1)
         r = self._results()
-        from charts.common import prepare_plot_df
         plot_df = prepare_plot_df(r)
         _add_trade_markers(fig, plot_df, 1, 1)
         self.assertGreaterEqual(len(fig.data), 1)
 
     def test_add_trade_markers_no_trades(self):
         """When no trades occurred (all trade == 0), zero marker traces should be added."""
-        from plotly.subplots import make_subplots
         fig = make_subplots(rows=1, cols=1)
         df = pd.DataFrame({
             "date": pd.date_range("2020-01-01", periods=5, freq="B"),
@@ -671,22 +624,18 @@ class TestMovingAverageChart(unittest.TestCase):
         _add_trade_markers(fig, df, 1, 1)
         self.assertEqual(len(fig.data), 0)
 
-
 # backtester.InvalidTickerError
 class TestInvalidTickerError(unittest.TestCase):
     """Verify the custom InvalidTickerError exception behaves correctly."""
 
     def test_is_exception(self):
         """InvalidTickerError should be a subclass of Exception."""
-        from backtester import InvalidTickerError
         self.assertTrue(issubclass(InvalidTickerError, Exception))
 
     def test_message(self):
         """The error message should be preserved when the exception is raised."""
-        from backtester import InvalidTickerError
         e = InvalidTickerError("test")
         self.assertEqual(str(e), "test")
-
 
 # Moving Average chart sell markers
 class TestMovingAverageChartSellMarkers(unittest.TestCase):
@@ -701,7 +650,6 @@ class TestMovingAverageChartSellMarkers(unittest.TestCase):
             + [225.0 - i * 1.5 for i in range(250)]
         )
         df = _make_prices(n, close_values=prices)
-        from strategies.moving_average import moving_average_crossover
         results = moving_average_crossover(df, 10000.0, pd.DataFrame())
         fig = ma_build(results, {"Total Return": 0.1}, 10000.0)
         self.assertIsInstance(fig, go.Figure)
