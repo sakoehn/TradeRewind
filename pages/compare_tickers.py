@@ -41,20 +41,20 @@ st.set_page_config(page_title="Compare Tickers")
 COMPARISON_EXTRA_PLOTTERS: Dict[str, Callable[..., go.Figure]] = {}
 
 
-# Labels and display options for each metric we can plot.
+# Labels and display options for each metric we can plot (user-friendly, not backend names).
 PORTFOLIO_SERIES: Dict[str, Dict[str, str]] = {
     "daily_value": {
-        "label": "Portfolio value",
-        "y_title": "Portfolio value ($)",
+        "label": "Daily Value",
+        "y_title": "Daily Value ($)",
         "hover": "%{y:.2f}",
     },
     "daily_returns": {
-        "label": "Daily returns",
-        "y_title": "Daily returns",
+        "label": "Daily Returns",
+        "y_title": "Daily Returns",
         "hover": "%{y:.4f}",
     },
     "profit_to_date": {
-        "label": "Profit to date",
+        "label": "Profit to Date",
         "y_title": "Profit ($)",
         "hover": "%{y:.2f}",
     },
@@ -63,6 +63,11 @@ PORTFOLIO_SERIES: Dict[str, Dict[str, str]] = {
         "y_title": "Drawdown",
         "hover": "%{y:.4f}",
     },
+}
+# Show labels in dropdown map selection back to backend keys.
+PORTFOLIO_SERIES_LABELS: List[str] = [PORTFOLIO_SERIES[k]["label"] for k in PORTFOLIO_SERIES]
+LABEL_TO_SERIES_KEY: Dict[str, str] = {
+    meta["label"]: key for key, meta in PORTFOLIO_SERIES.items()
 }
 
 def ticker_colors(ticker_list: Iterable[str]) -> Dict[str, str]:
@@ -179,7 +184,7 @@ def plot_portfolio_series(
                     showlegend=(row_idx == 1),
                     line={"color": colors[ticker_symbol], "width": 2},
                     hovertemplate=(
-                        f"{ticker_symbol} - {series_key}: {meta['hover']}"
+                        f"{ticker_symbol} - {meta['label']}: {meta['hover']}"
                         "<br>Date: %{x}<extra></extra>"
                     ),
                 ),
@@ -345,15 +350,16 @@ with col5:
         format="%.0f",
     )
 with col6:
-    selected_series = st.multiselect(
+    selected_labels = st.multiselect(
         "Portfolio series to plot",
-        options=list(PORTFOLIO_SERIES.keys()),
-        default=["daily_value"],
+        options=PORTFOLIO_SERIES_LABELS,
+        default=["Daily Value"],
         help=(
             "Choose what to visualize across tickers. "
             "If you select multiple, you'll get one subplot per series."
         ),
     )
+    selected_series = [LABEL_TO_SERIES_KEY[label] for label in selected_labels]
 
 run = st.button("Run comparison", type="primary")
 

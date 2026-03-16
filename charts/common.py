@@ -30,6 +30,14 @@ _METRIC_LABELS = {
 # Keywords in a key that indicate the value should be shown as a percentage
 _PCT_KEYWORDS = {"return", "drawdown", "volatility", "rate"}
 
+# User friendly labels for portfolio series on charts (legend and hover).
+_PORTFOLIO_SERIES_LABELS = {
+    "daily_value": "Daily Value",
+    "daily_returns": "Daily Returns",
+    "profit_to_date": "Profit to Date",
+    "drawdown": "Drawdown",
+}
+
 
 def format_summary(summary: Dict[str, Any]) -> Dict[str, str]:
     """Convert raw metric floats to human-readable strings.
@@ -111,17 +119,20 @@ def add_portfolio_traces(
     available = [c for c in columns_to_plot if c in plot_df.columns]
 
     for col_name in available:
+        display_name = _PORTFOLIO_SERIES_LABELS.get(
+            col_name, col_name.replace("_", " ").title()
+        )
         hover_fmt = (
-            f"{col_name}: %{{y:.4f}}<br>Date: %{{x}}<extra></extra>"
+            f"{display_name}: %{{y:.4f}}<br>Date: %{{x}}<extra></extra>"
             if col_name == "daily_returns"
-            else f"{col_name}: %{{y:.2f}}<br>Date: %{{x}}<extra></extra>"
+            else f"{display_name}: %{{y:.2f}}<br>Date: %{{x}}<extra></extra>"
         )
         fig.add_trace(
             go.Scatter(
                 x=plot_df["date"],
                 y=plot_df[col_name],
                 mode="lines",
-                name=col_name,
+                name=display_name,
                 hovertemplate=hover_fmt,
             ),
             row=row,
