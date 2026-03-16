@@ -17,12 +17,6 @@ from strategies import (
 )
 from ui_shared import apply_shared_ui
 
-# st.set_page_config(
-#     page_title="Trade Rewind",
-#     page_icon="📈",
-#     layout="wide",
-#     initial_sidebar_state="expanded",
-# )
 apply_shared_ui()
 
 def _available_tickers():
@@ -30,16 +24,8 @@ def _available_tickers():
     df = load_all_data()
     return sorted(set(df["ticker"].dropna().astype(str).str.upper()))
 
-
 st.title("Trade Rewind")
 st.caption("A tool to understand stock backtesting.")
-
-# Display the logo at the top of the page
-logo_path = "logo.png"
-if os.path.exists(logo_path):
-    st.image(logo_path, width=700)
-else:
-    st.warning("Logo file not found. Please ensure 'logo.png' is in the project directory.")
 
 st.write("")
 st.write("#### Learn more")
