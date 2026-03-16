@@ -13,7 +13,7 @@ if st.button("Back to main page", type="secondary"):
 
 st.write("")
 
-# ── Buy and Hold ─────────────────────────────────────────────────────────────
+#Buy and Hold
 st.subheader("Buy and Hold")
 st.write(
     "The simplest possible strategy. On day one the entire starting capital "
@@ -29,7 +29,7 @@ st.markdown(
 
 st.divider()
 
-# ── Moving Average Crossover ─────────────────────────────────────────────────
+#Moving Average Crossover
 st.subheader("Moving Average Crossover")
 st.write(
     "A trend-following strategy that uses two Simple Moving Averages (SMA). "
@@ -54,7 +54,7 @@ st.info(
 
 st.divider()
 
-# ── Momentum ─────────────────────────────────────────────────────────────────
+#Momentum
 st.subheader("Momentum")
 st.write(
     "A momentum strategy that compares today's closing price to the closing "
