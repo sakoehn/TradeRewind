@@ -37,7 +37,7 @@ focusColor = "#1f77b4"
 path = "logo.png"
 
 # Logo alignment on the page (e.g., left, center, right)
-alignment = "center"
+alignment = "left"
 
 # Logo size (e.g., small, medium, large)
 size = "medium"
