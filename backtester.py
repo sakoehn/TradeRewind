@@ -28,6 +28,7 @@ def main_backtest(
     end_date,
     strategy: str,
     initial_capital: float,
+    **strategy_kwargs,
 ):
     """Run a full backtest and return results, summary metrics, and a chart.
 
@@ -38,6 +39,8 @@ def main_backtest(
         strategy: Strategy name, e.g. ``"Buy and Hold"`` or
             ``"Moving Average Crossover"`` (case-insensitive).
         initial_capital: Starting cash in dollars.
+        **strategy_kwargs: Extra keyword arguments forwarded to the strategy
+            (e.g. ``lookback_days``, ``trade_proportion`` for momentum).
 
     Returns:
         Tuple of ``(results_df, summary_dict, plotly_figure, metrics_df)``.
@@ -50,7 +53,7 @@ def main_backtest(
         raise InvalidTickerError(f"No data found for ticker '{stock}'.")
 
     prices = get_stock_history(stock, start_date, end_date, df)
-    results = run_strategy(prices, strategy, initial_capital, df)
+    results = run_strategy(prices, strategy, initial_capital, df, **strategy_kwargs)
     summary = compute_metrics(results, initial_capital)
     fig, metrics_df = strategy_dashboard(results, strategy, summary, initial_capital)
 

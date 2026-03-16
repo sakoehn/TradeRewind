@@ -22,6 +22,7 @@ import plotly.graph_objects as go
 from charts.common import build_metrics_df, format_summary
 from charts.buy_and_hold_chart import build as _build_buy_and_hold
 from charts.moving_average_chart import build as _build_moving_average
+from charts.momentum_chart import build as _build_momentum
 
 
 def strategy_dashboard(
@@ -57,6 +58,8 @@ def strategy_dashboard(
         fig = _build_buy_and_hold(results_df, summary, initial_capital)
     elif key == "moving average crossover":
         fig = _build_moving_average(results_df, summary, initial_capital)
+    elif key == "momentum":
+        fig = _build_momentum(results_df, summary, initial_capital)
     else:
         raise ValueError(
             f"'{strategy}' is not a recognised strategy. "

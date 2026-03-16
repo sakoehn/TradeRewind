@@ -102,6 +102,29 @@ strat_key = display_name_to_key(strat)
 if strat_key in STRATEGY_INFO:
     st.info(STRATEGY_INFO[strat_key], icon="📈")
 
+# Momentum-specific parameters
+strategy_kwargs = {}
+if strat_key == "momentum":
+    mcol1, mcol2 = st.columns(2)
+    with mcol1:
+        lookback_days = st.number_input(
+            "Lookback days",
+            min_value=1,
+            max_value=100,
+            value=20,
+            step=1,
+        )
+    with mcol2:
+        trade_proportion = st.slider(
+            "Trade proportion (%)",
+            min_value=1,
+            max_value=100,
+            value=10,
+            step=1,
+        )
+    strategy_kwargs["lookback_days"] = lookback_days
+    strategy_kwargs["trade_proportion"] = trade_proportion
+
 st.write("")
 submit_button = st.button("Run backtest", type="primary")
 
@@ -146,6 +169,7 @@ if submit_button:
             end_date=end_arg,
             strategy=strat,
             initial_capital=float(input_cap),
+            **strategy_kwargs,
         )
 
     except InvalidTickerError:
