@@ -17,14 +17,13 @@ from strategies import (
 )
 from ui_shared import apply_shared_ui
 
-st.set_page_config(
-    page_title="Trade Rewind",
-    page_icon="📈",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+# st.set_page_config(
+#     page_title="Trade Rewind",
+#     page_icon="📈",
+#     layout="wide",
+#     initial_sidebar_state="expanded",
+# )
 apply_shared_ui()
-
 
 def _available_tickers():
     """Return sorted list of unique ticker symbols (uppercase) from the full dataset."""

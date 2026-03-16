@@ -26,7 +26,6 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: tradeRewind
-          auto-activate-base: false
           environment-file: environment.yml
           auto-update-conda: true
 

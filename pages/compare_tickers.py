@@ -35,6 +35,8 @@ from strategies import (
 )
 from ui_shared import apply_shared_ui
 
+st.set_page_config(page_title="Compare Tickers")  
+
 # Extra charts we can show for some strategies (ex: moving averages).
 COMPARISON_EXTRA_PLOTTERS: Dict[str, Callable[..., go.Figure]] = {}
 

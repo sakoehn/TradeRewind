@@ -6,7 +6,7 @@ from data_loading import load_all_data
 from ui_shared import apply_shared_ui
 
 apply_shared_ui()
-
+st.set_page_config(page_title="Stock Information") 
 st.title("Stock Information Page")
 st.caption("Browse and search the stocks available in Trade Rewind.")
 
