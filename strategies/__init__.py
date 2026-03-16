@@ -15,6 +15,7 @@ from typing import Dict, List
 
 from strategies.buy_and_hold import buy_and_hold
 from strategies.moving_average import moving_average_crossover
+from strategies.momentum import momentum
 
 # Strategy registry:
 # Maps the internal key (lower-cased) to its callable.
@@ -28,12 +29,14 @@ from strategies.moving_average import moving_average_crossover
 REGISTRY: dict = {
     "buy and hold": buy_and_hold,
     "moving average crossover": moving_average_crossover,
+    "momentum": momentum,
 }
 
 # Display names for UI (dropdowns, titles). Key = same as REGISTRY key.
 DISPLAY_NAMES: Dict[str, str] = {
     "buy and hold": "Buy and Hold",
     "moving average crossover": "Moving Average Crossover",
+    "momentum": "Momentum",
 }
 
 # Optional: info text shown on home page when this strategy is selected.
@@ -45,6 +48,13 @@ STRATEGY_INFO: Dict[str, str] = {
         "Cross)* and sells when it crosses below *(Death Cross)*.  \n"
         "Requires **at least 201 trading days** (~1 year) of data. "
         "Widen your date range if you see an error."
+    ),
+    "momentum": (
+        "**Momentum (Lookback Ratio)**  \n"
+        "Compares today's price to the price *N* days ago. "
+        "Buys a fixed percentage of initial capital when the ratio > 1 "
+        "(upward momentum) and sells when < 1 (downward momentum).  \n"
+        "Default: 20-day lookback, 10 % trade size."
     ),
 }
 
@@ -63,7 +73,7 @@ def display_name_to_key(display_name: str) -> str:
     return d.lower()
 
 
-def run_strategy(prices, strategy: str, initial_capital: float, full_df):
+def run_strategy(prices, strategy: str, initial_capital: float, full_df, **kwargs):
     """Dispatch to the correct strategy function via REGISTRY.
 
     Args:
@@ -72,6 +82,8 @@ def run_strategy(prices, strategy: str, initial_capital: float, full_df):
         initial_capital: Starting cash in dollars.
         full_df: Full combined dataset passed through to strategies that
             need market-wide context.
+        **kwargs: Extra keyword arguments forwarded to the strategy function
+            (e.g. ``lookback_days``, ``trade_proportion`` for momentum).
 
     Returns:
         Enriched results DataFrame from the chosen strategy.
@@ -88,7 +100,7 @@ def run_strategy(prices, strategy: str, initial_capital: float, full_df):
             f"Choose one of: {valid}"
         )
 
-    return REGISTRY[key](prices, initial_capital, full_df)
+    return REGISTRY[key](prices, initial_capital, full_df, **kwargs)
 
 
 __all__ = [
@@ -98,6 +110,7 @@ __all__ = [
     "buy_and_hold",
     "display_name_to_key",
     "get_strategy_display_names",
+    "momentum",
     "moving_average_crossover",
     "run_strategy",
 ]
