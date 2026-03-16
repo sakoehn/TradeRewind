@@ -1,0 +1,42 @@
+# TradeRewind – light, modern theme (user-friendly)
+# https://docs.streamlit.io/develop/concepts/configuration
+
+[app]
+name = "TradeRewind"
+version = "1.0.0"
+
+[database]
+# Database connection settings
+host = "localhost"
+port = 5432
+username = "user"
+password = "password"
+
+[logging]
+# Logging settings
+level = "INFO"
+file = "logs/app.log"
+
+[features]
+# Feature toggles
+enable_backtesting = true
+enable_visualizations = true
+
+[paths]
+# File paths
+data_directory = "data/"
+charts_directory = "charts/"
+strategies_directory = "strategies/"
+
+[theme]
+primaryColor = "#059669"
+backgroundColor = "#f8fafc"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1e293b"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

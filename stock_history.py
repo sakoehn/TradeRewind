@@ -1,5 +1,7 @@
-"""
-    Returns a subset of the full data that only includes the stock information wanted by the user.
+"""Stock history and filtering for TradeRewind.
+
+Provides validation and date-filtered history for a single stock from the
+combined dataset. Used by the backtester and compare-tickers flow.
 """
 import pandas as pd
 from data_loading import load_all_data
@@ -71,10 +73,8 @@ def validate_date(start, end, stock_df):
     return start_ts, end_ts
 
 
-def get_stock_history(stock, start=None, end=None, stocks_df=None):
-    """
-    Return a date-filtered history for a stock from the combined dataframe.
-    """
+def get_stock_history(stock, start=None, end=None, stocks_df=None):  # pylint: disable=too-many-branches
+    """Return a date-filtered history for a stock from the combined dataframe."""
     if stocks_df is None or not isinstance(stocks_df, pd.DataFrame):
         raise TypeError("A valid dataframe must be provided.")
 
@@ -115,6 +115,21 @@ def get_stock_history(stock, start=None, end=None, stocks_df=None):
     subset = stock_df[
         (stock_df["date"] >= start_ts) & (stock_df["date"] <= end_ts)
     ].copy()
+
+    min_date = stock_df["date"].min()
+    max_date = stock_df["date"].max()
+
+    if start is not None:
+        requested_start = pd.to_datetime(start, utc=True)
+        if requested_start < min_date:
+            subset.attrs["requested_start_date"] = requested_start
+            subset.attrs["adjusted_start_date"] = min_date
+
+    if end is not None:
+        requested_end = pd.to_datetime(end, utc=True)
+        if requested_end > max_date:
+            subset.attrs["requested_end_date"] = requested_end
+            subset.attrs["adjusted_end_date"] = max_date
 
     if subset.empty:
         raise ValueError("No data available for the requested date range.")

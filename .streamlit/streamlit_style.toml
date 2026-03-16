@@ -1,0 +1,24 @@
+# TradeRewind design spec (light, modern, user-friendly)
+# Applied via .streamlit/config.toml and ui_shared.py
+
+[theme]
+primaryColor = "#059669"
+backgroundColor = "#f8fafc"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1e293b"
+font = "sans serif"
+
+[layout]
+pageLayout = "wide"
+
+[logo]
+# logo.png lives in this folder (.streamlit/)
+path = "logo.png"
+alignment = "center"
+size = "medium"
+
+[button]
+primaryBackground = "#10b981"
+primaryText = "#0f172a"
+secondaryBorder = "#10b981"
+secondaryText = "#10b981"

@@ -356,27 +356,124 @@ class TestMovingAverageCrossover:
         )
         assert isinstance(result, pd.DataFrame)
 
-# buy_and_hold (regression)
+# buy_and_hold — full coverage
 class TestBuyAndHold:
-    """Regression tests to ensure buy_and_hold is unaffected by the refactor."""
+    """Tests for buy_and_hold: core behaviour, output contract, key formulas."""
 
     def test_position_constant(self):
-        result = buy_and_hold(_make_prices(50), 1000.0, pd.DataFrame())
-        assert result["position"].nunique() == 1
+        """Buy-and-hold holds the same number of shares every day."""
+        prices_df = _make_prices(50)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        num_different_positions = result["position"].nunique()
+        assert num_different_positions == 1
 
     def test_daily_value_equals_shares_times_price(self):
-        df = _make_prices(50, close_values=[i + 10.0 for i in range(50)])
-        result = buy_and_hold(df, 1000.0, pd.DataFrame())
-        expected = result["position"] * result["close"]
+        """Portfolio value each day should equal shares held times price that day."""
+        close_prices = [10.0 + i for i in range(50)]
+        prices_df = _make_prices(50, close_values=close_prices)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        expected_value = result["position"] * result["close"]
         pd.testing.assert_series_equal(
             result["daily_value"].reset_index(drop=True),
-            expected.reset_index(drop=True),
+            expected_value.reset_index(drop=True),
             check_names=False,
         )
 
     def test_flat_prices_zero_profit(self):
-        result = buy_and_hold(_make_prices(50, close_values=[100.0] * 50), 1000.0, pd.DataFrame())
-        assert result["profit_to_date"].values == pytest.approx(0.0)
+        """If the price never changes, profit should be zero."""
+        flat_prices = [100.0] * 50
+        prices_df = _make_prices(50, close_values=flat_prices)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        profit_series = result["profit_to_date"]
+        assert profit_series.values == pytest.approx(0.0)
+
+    def test_returns_dataframe(self):
+        """buy_and_hold should return a pandas DataFrame."""
+        prices_df = _make_prices(10)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        assert isinstance(result, pd.DataFrame)
+
+    def test_output_has_all_required_columns(self):
+        """Result should include position, price, daily_value, daily_returns, profit_to_date, drawdown."""
+        prices_df = _make_prices(10)
+        initial_capital = 5000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        required_column_names = {
+            "position", "price", "daily_value", "daily_returns",
+            "profit_to_date", "drawdown",
+        }
+        result_columns = set(result.columns)
+        assert required_column_names.issubset(result_columns)
+
+    def test_price_equals_close(self):
+        """The 'price' column should match the 'close' column."""
+        close_prices = [50.0 + i for i in range(20)]
+        prices_df = _make_prices(20, close_values=close_prices)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        pd.testing.assert_series_equal(
+            result["price"], result["close"], check_names=False
+        )
+
+    def test_daily_value_first_day_equals_initial_capital(self):
+        """On the first day we invest all cash, so portfolio value equals initial capital."""
+        prices_df = _make_prices(10, close_values=[50.0] * 10)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        first_day_value = result["daily_value"].iloc[0]
+        assert first_day_value == pytest.approx(initial_capital)
+
+    def test_daily_returns_first_row_zero(self):
+        """The first day has no previous day to compare, so daily return is zero."""
+        prices_df = _make_prices(10)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        first_day_return = result["daily_returns"].iloc[0]
+        assert first_day_return == pytest.approx(0.0)
+
+    def test_profit_to_date_equals_daily_value_minus_capital(self):
+        """Profit to date is current portfolio value minus what we started with."""
+        close_prices = [100.0 + i * 2 for i in range(20)]
+        prices_df = _make_prices(20, close_values=close_prices)
+        initial_capital = 5000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        expected_profit = result["daily_value"] - initial_capital
+        pd.testing.assert_series_equal(
+            result["profit_to_date"].reset_index(drop=True),
+            expected_profit.reset_index(drop=True),
+            check_names=False,
+        )
+
+    def test_drawdown_non_positive(self):
+        """Drawdown is never positive; it measures how far we are below the peak."""
+        falling_prices = [100.0 - i for i in range(30)]
+        prices_df = _make_prices(30, close_values=falling_prices)
+        initial_capital = 1000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        drawdown_series = result["drawdown"]
+        assert (drawdown_series <= 0).all()
+
+    def test_input_not_mutated(self):
+        """Calling buy_and_hold should not change the input DataFrame's columns."""
+        prices_df = _make_prices(10)
+        columns_before = set(prices_df.columns)
+        initial_capital = 1000.0
+        buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        columns_after = set(prices_df.columns)
+        assert columns_before == columns_after
+
+    def test_rising_prices_positive_profit_at_end(self):
+        """If prices go up over time, we should have positive profit at the end."""
+        rising_prices = [100.0 + i * 5 for i in range(20)]
+        prices_df = _make_prices(20, close_values=rising_prices)
+        initial_capital = 10000.0
+        result = buy_and_hold(prices_df, initial_capital, pd.DataFrame())
+        final_profit = result["profit_to_date"].iloc[-1]
+        assert final_profit > 0
 
 # strategies.run_strategy dispatch
 class TestRunStrategy:
