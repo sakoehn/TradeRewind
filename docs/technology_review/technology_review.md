@@ -40,6 +40,7 @@
 | Matplotlib | Yes | Will Use | Great for static charts but not the kind of interactive charts we want. We might still use for pyplot.table function to draw the metrics table |
 | Seaborn | Yes | Considered | Good statistical visualizations but still static.   |
 
+*Please find the implemenation in 'techstack_comparison.ipynb' file*
 **Reports:**
 
 | Library | Considered | Decision | Notes |
