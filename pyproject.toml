@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trade-rewind"
+version = "1.0.0"
+authors = [
+  { name = "Arlette Ngabonzima" },
+  { name = "Priyal Jain" },
+  { name = "Sophia Koehn" },
+  { name = "Scott Fry" },
+]
+description = "Interactive stock backtesting tool for exploring and validating trading strategies"
+readme = "README.md"
+requires-python = ">=3"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+include = ["charts*", "strategies*"]
+
+[project.urls]
+Homepage = "https://github.com/sakoehn/TradeRewind"
+Issues = "https://github.com/sakoehn/TradeRewind/issues"

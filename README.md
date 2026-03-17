@@ -169,6 +169,17 @@ After using the application, you can deactivate the Conda environment by running
 conda deactivate
 ```
 
+### To install the project package
+The built packages are found in the dist folder as: 
+    dist/trade_rewind-1.0.0-py3-none-any.whl
+    dist/trade_rewind-1.0.0.tar.gz
+    
+To install the built package, run:
+
+```bash
+python3 -m pip install ./trade_rewind-1.0.0.tar.gz
+```
+
 ## Video Demonstration
 -------------------------
 Access the demo here for a detailed understanding of the flow of our project. *ADD VIDEO
