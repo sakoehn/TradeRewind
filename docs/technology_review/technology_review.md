@@ -41,6 +41,7 @@
 | Seaborn | Yes | Considered | Good statistical visualizations but still static.   |
 
 *Please find the implemenation in 'techstack_comparison.ipynb' file*
+
 **Reports:**
 
 | Library | Considered | Decision | Notes |
