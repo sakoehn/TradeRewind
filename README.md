@@ -170,11 +170,11 @@ conda deactivate
 ```
 
 ### To install the project package
-The built packages are found in the dist folder as: 
-    dist/trade_rewind-1.0.0-py3-none-any.whl
-    dist/trade_rewind-1.0.0.tar.gz
-    
-To install the built package, run:
+Built artifacts are in the repo’s **`dist/`** folder:
+- `dist/trade_rewind-1.0.0.tar.gz` which is the source distribution
+- `dist/trade_rewind-1.0.0-py3-none-any.whl` which is the wheel
+
+From the repo root or any folder that contains the .tar.gz file:
 
 ```bash
 python3 -m pip install ./trade_rewind-1.0.0.tar.gz
@@ -182,7 +182,7 @@ python3 -m pip install ./trade_rewind-1.0.0.tar.gz
 
 ## Video Demonstration
 -------------------------
-Access the demo here for a detailed understanding of the flow of our project. *ADD VIDEO
+Access the demo here for a detailed understanding of the flow of our project.  [Trade Rewind Final Demo](docs/Trade%20Rewind%20Final%20Demo.mov) 
 
 
 
