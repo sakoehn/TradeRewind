@@ -1,0 +1,17 @@
+# Including all source files
+include README.md
+include LICENSE
+include environment.yml
+include pyproject.toml
+recursive-include charts *.py
+recursive-include strategies *.py
+recursive-include pages *.py
+recursive-include tests *.py
+recursive-include .streamlit *.toml *.png
+include *.py
+
+# Excluding large or system files 
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.parquet
+global-exclude *.mov
